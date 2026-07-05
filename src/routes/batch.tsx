@@ -3,8 +3,9 @@ import { useMemo, useState } from 'react'
 import { Layers, Loader2, Package } from 'lucide-react'
 import type { OutputFormat } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
-import { DEFAULT_QUALITY, compressionStats, supportsQuality } from '#/lib/compress.ts'
+import { compressionStats, supportsQuality } from '#/lib/compress.ts'
 import { withExtension } from '#/lib/convert.ts'
+import { useSettingsStore } from '#/stores/settingsStore.ts'
 import { downloadBlob } from '#/lib/download.ts'
 import { formatBytes } from '#/lib/format.ts'
 import { zipBlobs } from '#/lib/zip.ts'
@@ -20,8 +21,9 @@ import { Button } from '#/components/ui/button.tsx'
 export const Route = createFileRoute('/batch')({ component: BatchPage })
 
 function BatchPage() {
-  const [format, setFormat] = useState<OutputFormat>('image/webp')
-  const [quality, setQuality] = useState(DEFAULT_QUALITY)
+  const settings = useSettingsStore.getState()
+  const [format, setFormat] = useState<OutputFormat>(settings.defaultFormat)
+  const [quality, setQuality] = useState(settings.defaultQuality)
   const [zipping, setZipping] = useState(false)
 
   const options: ProcessOptions = { encode: { format, quality } }

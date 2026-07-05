@@ -21,6 +21,10 @@
   --hairline-strong: rgba(255, 255, 255, 0.14);
   --divider-soft: rgba(255, 255, 255, 0.04);
 
+  /* Theme-adaptive chrome (overridden in .light). */
+  --header-bg: rgba(0, 0, 0, 0.72);
+  --feature-hover-border: rgba(255, 255, 255, 0.24);
+
   --ink: #fcfdff;
   --body: rgba(252, 253, 255, 0.86);
   --charcoal: rgba(252, 253, 255, 0.7);
@@ -89,6 +93,42 @@
   --border: var(--hairline-strong);
   --input: var(--hairline-strong);
   --ring: var(--ink);
+}
+
+/* Light register. The shadcn semantic vars above are `var(--raw-token)`
+   references resolved per-element, so redefining only the raw DESIGN.md tokens
+   here re-tints the whole system. Elevation inverts (near-white canvas, light
+   grey surfaces), hairlines become translucent black, and the primary CTA flips
+   to a black pill with white text — mirroring the white-on-black signature. */
+.light {
+  --canvas: #ffffff;
+  --surface-card: #f6f6f8;
+  --surface-elevated: #efeff2;
+  --surface-deep: #eaeaee;
+
+  --hairline: rgba(0, 0, 0, 0.08);
+  --hairline-strong: rgba(0, 0, 0, 0.14);
+  --divider-soft: rgba(0, 0, 0, 0.05);
+
+  --header-bg: rgba(255, 255, 255, 0.78);
+  --feature-hover-border: rgba(0, 0, 0, 0.18);
+
+  --ink: #0a0a0c;
+  --body: rgba(10, 10, 12, 0.86);
+  --charcoal: rgba(10, 10, 12, 0.7);
+  --mute: #5c6063;
+  --ash: #6b7073;
+  --stone: #b9bdc0;
+
+  /* Flip the primary CTA: dark pill, light label. */
+  --primary-white: #0a0a0c;
+  --primary-on: #ffffff;
+
+  /* Slightly stronger link/accent for contrast on white. */
+  --accent-blue-glow: rgba(0, 117, 255, 0.16);
+  --accent-orange-glow: rgba(255, 89, 0, 0.14);
+  --accent-green-glow: rgba(34, 200, 120, 0.16);
+  --accent-red-glow: rgba(255, 32, 71, 0.14);
 }
 
 @theme inline {
@@ -233,7 +273,7 @@ code,
     transform 180ms ease;
 }
 .feature-card:hover {
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: var(--feature-hover-border);
 }
 
 /* --- Atmospheric glow: single low-opacity radial anchored at section top --- */

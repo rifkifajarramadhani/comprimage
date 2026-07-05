@@ -1,6 +1,7 @@
 import type { ProcessInput, ProcessOptions } from '#/lib/process.ts'
 import type { ProcessResult, SourceImage } from '#/types/image.ts'
 import { processImage } from '#/lib/process.ts'
+import { clampConcurrency, maxConcurrency } from '#/lib/settings.ts'
 import type { WorkerRequest, WorkerResponse } from './image.worker.ts'
 
 /**
@@ -25,18 +26,15 @@ interface PoolTask {
   pending: Pending
 }
 
-const POOL_SIZE = Math.max(
-  1,
-  Math.min(
-    typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : 4,
-    4,
-  ),
+const DEFAULT_POOL_SIZE = Math.min(
+  typeof navigator !== 'undefined' && navigator.hardwareConcurrency
+    ? navigator.hardwareConcurrency
+    : 4,
+  4,
 )
 
 function workersSupported(): boolean {
-  return (
-    typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined'
-  )
+  return typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined'
 }
 
 class ImagePool {
@@ -45,30 +43,87 @@ class ImagePool {
   private queue: Array<PoolTask> = []
   private inFlight = new Map<number, Pending>()
   private busyWorker = new Map<number, Worker>()
+  // Busy workers that should be terminated (not reused) once they finish — used
+  // when shrinking a running pool while some workers are mid-task.
+  private retiring = new Set<Worker>()
   private nextId = 1
   private started = false
+  private size = clampConcurrency(DEFAULT_POOL_SIZE)
+
+  private spawn(): Worker {
+    const worker = new Worker(new URL('./image.worker.ts', import.meta.url), {
+      type: 'module',
+    })
+    worker.addEventListener('message', (e: MessageEvent<WorkerResponse>) =>
+      this.onMessage(worker, e.data),
+    )
+    return worker
+  }
 
   private ensureStarted() {
     if (this.started) return
     this.started = true
-    for (let i = 0; i < POOL_SIZE; i++) {
-      const worker = new Worker(
-        new URL('./image.worker.ts', import.meta.url),
-        { type: 'module' },
-      )
-      worker.addEventListener('message', (e: MessageEvent<WorkerResponse>) =>
-        this.onMessage(worker, e.data),
-      )
+    for (let i = 0; i < this.size; i++) {
+      const worker = this.spawn()
       this.workers.push(worker)
       this.idle.push(worker)
     }
+  }
+
+  /**
+   * Resize the pool. Clamped to [1, maxConcurrency()]. Growing spawns workers
+   * and immediately pumps the queue; shrinking terminates idle workers now and
+   * marks surplus busy workers to be terminated when their task completes.
+   * A no-op before the pool has started (the new size seeds `ensureStarted`).
+   */
+  setSize(n: number) {
+    const next = clampConcurrency(n, maxConcurrency())
+    this.size = next
+    if (!this.started) return
+
+    if (this.workers.length < next) {
+      // Grow: add workers up to the new size.
+      while (this.workers.length < next) {
+        const worker = this.spawn()
+        this.workers.push(worker)
+        this.idle.push(worker)
+      }
+      this.pump()
+    } else if (this.workers.length > next) {
+      // Shrink: terminate idle workers first, then retire busy ones on completion.
+      let excess = this.workers.length - next
+      while (excess > 0 && this.idle.length > 0) {
+        const worker = this.idle.pop()!
+        this.terminateWorker(worker)
+        excess--
+      }
+      for (const worker of this.workers) {
+        if (excess <= 0) break
+        if (!this.retiring.has(worker)) {
+          this.retiring.add(worker)
+          excess--
+        }
+      }
+    }
+  }
+
+  private terminateWorker(worker: Worker) {
+    worker.terminate()
+    const i = this.workers.indexOf(worker)
+    if (i !== -1) this.workers.splice(i, 1)
+    this.retiring.delete(worker)
   }
 
   private onMessage(worker: Worker, data: WorkerResponse) {
     const pending = this.inFlight.get(data.id)
     this.inFlight.delete(data.id)
     this.busyWorker.delete(data.id)
-    this.idle.push(worker)
+    // Retire this worker instead of reusing it if the pool was shrunk mid-task.
+    if (this.retiring.has(worker)) {
+      this.terminateWorker(worker)
+    } else {
+      this.idle.push(worker)
+    }
 
     if (pending) {
       if (data.ok) {
@@ -102,11 +157,18 @@ class ImagePool {
     }
   }
 
-  process(input: ProcessInput, options: ProcessOptions): Promise<ProcessResult> {
+  process(
+    input: ProcessInput,
+    options: ProcessOptions,
+  ): Promise<ProcessResult> {
     if (!workersSupported()) {
       // Main-thread fallback keeps behaviour identical on old browsers.
       return processImage(
-        { file: input.file, width: input.width, height: input.height } as SourceImage,
+        {
+          file: input.file,
+          width: input.width,
+          height: input.height,
+        } as SourceImage,
         options,
       )
     }

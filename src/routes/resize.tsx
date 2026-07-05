@@ -2,7 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import type { OutputFormat, ResizeOptions } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
-import { DEFAULT_QUALITY, supportsQuality } from '#/lib/compress.ts'
+import { supportsQuality } from '#/lib/compress.ts'
+import { useSettingsStore } from '#/stores/settingsStore.ts'
 import { ToolWorkspace } from '#/components/ToolWorkspace.tsx'
 import { ResizeControls } from '#/components/controls/ResizeControls.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
@@ -11,14 +12,15 @@ import { CompressControls } from '#/components/controls/CompressControls.tsx'
 export const Route = createFileRoute('/resize')({ component: ResizePage })
 
 function ResizePage() {
+  const settings = useSettingsStore.getState()
   const [resize, setResize] = useState<ResizeOptions>({
     mode: 'width',
     value: 1280,
     keepAspectRatio: true,
-    preventUpscaling: true,
+    preventUpscaling: settings.preventUpscale,
   })
-  const [format, setFormat] = useState<OutputFormat>('image/jpeg')
-  const [quality, setQuality] = useState(DEFAULT_QUALITY)
+  const [format, setFormat] = useState<OutputFormat>(settings.defaultFormat)
+  const [quality, setQuality] = useState(settings.defaultQuality)
 
   const options: ProcessOptions = {
     resize,

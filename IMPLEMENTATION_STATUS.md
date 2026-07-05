@@ -4,7 +4,7 @@
 > This document tracks what's built and what's next so implementation can continue.
 
 **Last updated:** 2026-07-06
-**Scope completed:** Phases 1–4 (foundation + core tools + Web Worker) and the Phase 3 batch tool
+**Scope completed:** Phases 1–5 (foundation + core tools + Web Worker + batch + PWA & settings)
 
 ---
 
@@ -66,6 +66,42 @@
   progress, aggregate savings, individual downloads, and **Download all (ZIP)** wiring `lib/zip.ts`.
 - `Batch` added to the nav (`SiteHeader`). `zustand` added as a dependency.
 
+### 8. PWA & Settings (Phase 5)
+**PWA (offline + installable):**
+- `scripts/generate-sw.mjs` — generates the Workbox service worker (`dist/client/sw.js`) as a
+  post-build step. vite-plugin-pwa skips SSR/environment builds and never emits a SW under
+  TanStack Start's multi-environment build, so `workbox-build`'s `generateSW` is run directly.
+  Wired into `npm run build` (also `npm run generate-sw`). `workbox-build` is the dependency.
+- Precaches the shell + JS/CSS/worker chunks + icons (23 files); `navigateFallback: /_shell.html`
+  for offline SPA navigation; runtime `CacheFirst` for Google Fonts so type renders offline.
+- **Prompt-to-update** (not auto-reload — protects in-progress work): `skipWaiting:false` +
+  `public/sw-message.js` (imported into the SW) activates the waiting worker only when the user
+  clicks Reload. `src/components/pwa/PwaUpdater.tsx` registers `/sw.js`, detects updates, shows a
+  hairline toast, and reloads on the user-confirmed `controllerchange`.
+- `src/components/pwa/InstallButton.tsx` — captures `beforeinstallprompt`, shows an Install button
+  in the header only when installable. `public/manifest.json` gained a maskable icon + `id`/`scope`/
+  `orientation`/`categories`; `__root.tsx` adds an `apple-touch-icon`.
+
+**Settings + real light mode:**
+- `src/routes/settings.tsx` (+ nav entry in `SiteHeader`) — Appearance (System/Light/Dark),
+  Performance (concurrency 1..maxConcurrency), Defaults (format + quality + prevent-upscale), Reset.
+- `src/lib/settings.ts` — `AppSettings`, `DEFAULT_SETTINGS`, `maxConcurrency()`, pure
+  `clampConcurrency()` (unit-tested in `settings.test.ts`, 6 cases).
+- `src/stores/settingsStore.ts` — Zustand `persist` store (`comprimage-settings`); mutations drive
+  side effects (theme repaint, `imagePool.setSize`). `src/components/AppInit.tsx` applies persisted
+  settings on load and keeps `system` theme synced to the OS.
+- **Real light register** in `src/styles.css`: split `:root`/`.dark` from a new `.light` (inverted
+  elevation, translucent-black hairlines, black-pill CTA). Only raw DESIGN.md tokens are redefined —
+  the shadcn semantic vars are `var(--token)` refs that re-tint automatically. Theme-adaptive
+  `--header-bg`/`--feature-hover-border` replace the previously hardcoded blacks/whites.
+- `src/lib/theme.ts` — `applyTheme`/`resolveTheme`/`watchSystemTheme` + a standalone theme cache key
+  read by the **no-FOUC inline script** in `__root.tsx` (sets the register class before first paint).
+- **Configurable concurrency:** `src/workers/imagePool.ts` is now a resizable pool (`setSize` grows
+  by spawning, shrinks by terminating idle workers + retiring busy ones on completion). Both the
+  single-tool hook and the batch queue share the singleton, so the setting applies to both.
+- Tool routes (`compress`/`convert`/`resize`/`batch`) seed their initial format/quality/prevent-upscale
+  from `useSettingsStore.getState()`.
+
 ### 5. Tools + components
 - `src/components/ToolWorkspace.tsx` — shared workspace (source state + processing + preview/stats/download).
 - `src/routes/{resize,compress,convert}.tsx` — each composes the workspace with its own controls.
@@ -74,11 +110,16 @@
   `controls/{ResizeControls,CompressControls,FormatSelect}.tsx`, `common/DownloadButton.tsx`.
 
 ### Verification status
-- `tsc --noEmit` clean · `npm run test` **10/10 pass** · `npm run lint` clean · `npm run build` succeeds.
-- Build emits a code-split `image.worker-*.js` chunk; initial JS unchanged at ~117 KB gzip.
-- Preview server serves fully-rendered black-canvas HTML; all custom utilities compiled into CSS.
-- **Still needs a manual browser click-through** (jsdom has no canvas/worker): verify the home→resize
-  hand-off, worker output parity + UI responsiveness on a large photo, and the batch ZIP download.
+- `tsc --noEmit` clean · `npm run test` **16/16 pass** (resize 10 + settings 6) · `npm run lint` clean ·
+  `npm run build` succeeds and `generate-sw` precaches 23 files → `dist/client/sw.js`.
+- Build emits a code-split `image.worker-*.js` chunk + `sw.js`/`workbox-*.js`; initial JS ~124 KB gzip.
+- Dev server: all routes (incl. `/settings`) return 200 with no SSR/hydration errors; the shell head
+  carries `class="dark"`, the no-FOUC script, theme-color, manifest, and apple-touch-icon.
+- **Still needs a manual browser click-through** (jsdom has no canvas/worker): the home→resize hand-off,
+  worker output parity + UI responsiveness on a large photo, the batch ZIP download, **and Phase 5**:
+  theme toggle flips light/dark with no FOUC + persists; concurrency change reflects in worker count;
+  defaults seed the tool controls + Reset restores them; SW registers, offline reload works with **zero
+  image egress**, and the install prompt appears/installs.
 
 ---
 
@@ -93,15 +134,15 @@
    minor deviation from the "no drop shadows" rule if you want strict fidelity.
 4. **Batch has no resize control yet** — it applies format + quality to all files (compress/convert use
    cases). Add `ResizeControls` to `batch.tsx` if bulk-resize is wanted.
+5. **Service worker only exists in production builds** — generated by `scripts/generate-sw.mjs` after
+   `vite build` (deliberately not in dev). Test PWA/offline via `npm run build` then serve `dist/client`
+   (the SW needs `/_shell.html` served as the navigation fallback, same as the deploy note above).
+6. **Light-mode tokens are author-tuned, not audited** — accent/glow colors carry over from the dark
+   brand; do a visual + WCAG contrast pass on the light register (`.light` in `styles.css`).
 
 ---
 
 ## 🔜 Deferred (later phases)
-
-### Phase 5 — PWA & settings
-- Service worker / offline, install prompt.
-- `src/routes/settings.tsx` — theme toggle (a light register would need real light-mode tokens),
-  performance/concurrency prefs, persisted via IndexedDB/localStorage.
 
 ### Stretch
 - Target-file-size compression (binary-search quality).
@@ -114,7 +155,8 @@
 
 ```bash
 npm run dev              # dev server on :3000
-npm run build            # static SPA build -> dist/client
+npm run build            # static SPA build -> dist/client (+ generates sw.js)
+npm run generate-sw      # (re)generate the Workbox service worker from dist/client
 npm run preview          # preview the build
 npm run test             # vitest (unit tests)
 npm run lint             # eslint

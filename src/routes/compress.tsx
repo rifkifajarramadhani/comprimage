@@ -2,7 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import type { OutputFormat } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
-import { DEFAULT_QUALITY, supportsQuality } from '#/lib/compress.ts'
+import { supportsQuality } from '#/lib/compress.ts'
+import { useSettingsStore } from '#/stores/settingsStore.ts'
 import { ToolWorkspace } from '#/components/ToolWorkspace.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
 import { CompressControls } from '#/components/controls/CompressControls.tsx'
@@ -10,8 +11,9 @@ import { CompressControls } from '#/components/controls/CompressControls.tsx'
 export const Route = createFileRoute('/compress')({ component: CompressPage })
 
 function CompressPage() {
-  const [format, setFormat] = useState<OutputFormat>('image/jpeg')
-  const [quality, setQuality] = useState(DEFAULT_QUALITY)
+  const settings = useSettingsStore.getState()
+  const [format, setFormat] = useState<OutputFormat>(settings.defaultFormat)
+  const [quality, setQuality] = useState(settings.defaultQuality)
 
   // Compress keeps the source dimensions (no resize) — just re-encodes.
   const options: ProcessOptions = { encode: { format, quality } }

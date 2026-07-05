@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResizeRouteImport } from './routes/resize'
 import { Route as ConvertRouteImport } from './routes/convert'
 import { Route as CompressRouteImport } from './routes/compress'
 import { Route as BatchRouteImport } from './routes/batch'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResizeRoute = ResizeRouteImport.update({
   id: '/resize',
   path: '/resize',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/compress': typeof CompressRoute
   '/convert': typeof ConvertRoute
   '/resize': typeof ResizeRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/compress': typeof CompressRoute
   '/convert': typeof ConvertRoute
   '/resize': typeof ResizeRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,21 @@ export interface FileRoutesById {
   '/compress': typeof CompressRoute
   '/convert': typeof ConvertRoute
   '/resize': typeof ResizeRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/batch' | '/compress' | '/convert' | '/resize'
+  fullPaths: '/' | '/batch' | '/compress' | '/convert' | '/resize' | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/batch' | '/compress' | '/convert' | '/resize'
-  id: '__root__' | '/' | '/batch' | '/compress' | '/convert' | '/resize'
+  to: '/' | '/batch' | '/compress' | '/convert' | '/resize' | '/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/batch'
+    | '/compress'
+    | '/convert'
+    | '/resize'
+    | '/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +93,18 @@ export interface RootRouteChildren {
   CompressRoute: typeof CompressRoute
   ConvertRoute: typeof ConvertRoute
   ResizeRoute: typeof ResizeRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resize': {
       id: '/resize'
       path: '/resize'
@@ -125,6 +149,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompressRoute: CompressRoute,
   ConvertRoute: ConvertRoute,
   ResizeRoute: ResizeRoute,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
