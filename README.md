@@ -17,6 +17,36 @@ To build this application for production:
 npm run build
 ```
 
+# Deployment (Docker)
+
+Comprimage is a **100% client-side static SPA** (no backend, no database) — image
+processing runs entirely in the browser. It ships as a two-stage container: a **Bun**
+build stage produces the static output (`dist/client`), and an **nginx** stage serves it.
+
+Files:
+
+- `Dockerfile` — `oven/bun:1` build stage (`bun install --frozen-lockfile` + `bun run build`)
+  → `nginx:1.27-alpine` serving `dist/client`.
+- `docker/nginx/comprimage.conf` — SPA fallback to the prerendered `_shell.html`, `no-cache`
+  headers for `sw.js` / `manifest.json`, and long-lived caching for hashed `/assets`.
+- `docker-compose.yml` — a single `web` service on the external `edge` network.
+
+Build and run:
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+The app is served at **https://comprimage.rifkiramadhani.my.id**. TLS and routing are
+handled by the shared **Traefik** edge proxy (Let's Encrypt); the container joins the
+`edge` Docker network and publishes **no** host ports. Routing is configured via the
+Traefik labels on the `web` service in `docker-compose.yml`.
+
+> Note: the container builds with Bun, so the `build` script uses `bun scripts/generate-sw.mjs`
+> (the `oven/bun` image has no `node` binary). `vite.config.ts` pins the prerender preview
+> server to `127.0.0.1` so the build's prerender step is reliable inside containers.
+
 ## Testing
 
 This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:

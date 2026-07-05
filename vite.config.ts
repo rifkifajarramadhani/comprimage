@@ -12,6 +12,11 @@ import tailwindcss from '@tailwindcss/vite'
 // build it never emits sw.js — running workbox-build directly is deterministic.
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  // Pin the preview server (used by TanStack Start's prerender step) to IPv4.
+  // In minimal containers `localhost` resolves to both 127.0.0.1 and ::1; the
+  // preview server and the prerender fetch can otherwise pick different families,
+  // producing a ConnectionRefused during `vite build`'s prerender.
+  preview: { host: '127.0.0.1' },
   plugins: [
     devtools(),
     tailwindcss(),
