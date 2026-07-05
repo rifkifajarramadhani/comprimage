@@ -1,0 +1,318 @@
+/*
+ * Comprimage design system — based on DESIGN.md (Resend editorial black).
+ * Free substitute fonts: Fraunces (display serif), Inter (UI/body), Geist Mono (code).
+ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* --- DESIGN.md palette --- */
+  --canvas: #000000;
+  --surface-card: #0a0a0c;
+  --surface-elevated: #101012;
+  --surface-deep: #06060a;
+
+  --hairline: rgba(255, 255, 255, 0.06);
+  --hairline-strong: rgba(255, 255, 255, 0.14);
+  --divider-soft: rgba(255, 255, 255, 0.04);
+
+  --ink: #fcfdff;
+  --body: rgba(252, 253, 255, 0.86);
+  --charcoal: rgba(252, 253, 255, 0.7);
+  --mute: #a1a4a5;
+  --ash: #888e90;
+  --stone: #464a4d;
+
+  --primary-white: #fcfdff;
+  --primary-on: #000000;
+  --surface-light: #f1f7fe;
+
+  --accent-orange: #ff801f;
+  --accent-orange-glow: rgba(255, 89, 0, 0.22);
+  --accent-yellow: #ffc53d;
+  --accent-blue: #3b9eff;
+  --accent-blue-glow: rgba(0, 117, 255, 0.34);
+  --accent-green: #11ff99;
+  --accent-green-glow: rgba(34, 255, 153, 0.18);
+  --accent-red: #ff2047;
+  --accent-red-glow: rgba(255, 32, 71, 0.34);
+  --link: #3b9eff;
+
+  /* --- shadcn token mapping (the app ships dark; these are the defaults) --- */
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--surface-card);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-elevated);
+  --popover-foreground: var(--ink);
+  --primary: var(--primary-white);
+  --primary-foreground: var(--primary-on);
+  --secondary: var(--surface-elevated);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-elevated);
+  --muted-foreground: var(--mute);
+  --accent: var(--surface-elevated);
+  --accent-foreground: var(--ink);
+  --destructive: var(--accent-red);
+  --destructive-foreground: var(--ink);
+  --border: var(--hairline-strong);
+  --input: var(--hairline-strong);
+  --ring: var(--ink);
+
+  --radius: 0.5rem; /* 8px — buttons, inputs */
+}
+
+/* The design is single-register dark; keep .dark identical so shadcn's
+   dark: variants never fight the canvas. */
+.dark {
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--surface-card);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-elevated);
+  --popover-foreground: var(--ink);
+  --primary: var(--primary-white);
+  --primary-foreground: var(--primary-on);
+  --secondary: var(--surface-elevated);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-elevated);
+  --muted-foreground: var(--mute);
+  --accent: var(--surface-elevated);
+  --accent-foreground: var(--ink);
+  --destructive: var(--accent-red);
+  --destructive-foreground: var(--ink);
+  --border: var(--hairline-strong);
+  --input: var(--hairline-strong);
+  --ring: var(--ink);
+}
+
+@theme inline {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* semantic accents available as Tailwind colors */
+  --color-canvas: var(--canvas);
+  --color-surface-card: var(--surface-card);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-deep: var(--surface-deep);
+  --color-ink: var(--ink);
+  --color-body-text: var(--body);
+  --color-charcoal: var(--charcoal);
+  --color-mute: var(--mute);
+  --color-ash: var(--ash);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-yellow: var(--accent-yellow);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-green: var(--accent-green);
+  --color-accent-red: var(--accent-red);
+  --color-link: var(--link);
+
+  --radius-sm: 0.375rem; /* 6px */
+  --radius-md: 0.5rem; /* 8px */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-xl: 1rem; /* 16px */
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background-color: var(--canvas);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+/* --- Type utilities --- */
+.display-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-feature-settings: 'ss01', 'liga';
+}
+
+.kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--charcoal);
+}
+
+code,
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* --- Surfaces (elevation via hairline borders, never drop shadows) --- */
+.hairline {
+  border: 1px solid var(--hairline);
+}
+.hairline-strong {
+  border: 1px solid var(--hairline-strong);
+}
+
+.surface-card {
+  background: var(--surface-card);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-lg);
+}
+
+.surface-elevated {
+  background: var(--surface-elevated);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-lg);
+}
+
+.code-window {
+  background: var(--surface-deep);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-lg);
+  color: var(--body);
+}
+
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--surface-elevated);
+  border: 1px solid var(--hairline);
+  color: var(--body);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* Feature card: hairline surface, no drop shadow. Border warms on hover. */
+.feature-card {
+  background: var(--surface-card);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-lg);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+.feature-card:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+/* --- Atmospheric glow: single low-opacity radial anchored at section top --- */
+.atmos-glow {
+  position: relative;
+  isolation: isolate;
+}
+.atmos-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 600px;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    620px 380px at 50% 0%,
+    var(--glow, var(--accent-blue-glow)),
+    transparent 70%
+  );
+}
+.atmos-glow-orange {
+  --glow: var(--accent-orange-glow);
+}
+.atmos-glow-green {
+  --glow: var(--accent-green-glow);
+}
+.atmos-glow-red {
+  --glow: var(--accent-red-glow);
+}
+
+/* --- Nav link underline --- */
+.nav-link {
+  position: relative;
+  color: var(--charcoal);
+  font-weight: 500;
+  transition: color 170ms ease;
+}
+.nav-link:hover,
+.nav-link.is-active {
+  color: var(--ink);
+}
+.nav-link.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -21px;
+  height: 1px;
+  background: var(--ink);
+}
+
+.rise-in {
+  animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Inline / block code inside prose */
+code:not(pre code) {
+  font-size: 0.9em;
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-card);
+  border-radius: var(--radius-xs, 4px);
+  padding: 2px 6px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
