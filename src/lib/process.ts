@@ -1,5 +1,6 @@
 import type {
   EncodeOptions,
+  OutputFormat,
   ProcessResult,
   ResizeOptions,
   SourceImage,
@@ -13,24 +14,39 @@ export interface ProcessOptions {
   encode: EncodeOptions
 }
 
+/** The pipeline input, decoupled from `SourceImage` so it can cross a worker boundary. */
+export interface ProcessInput {
+  file: File
+  width: number
+  height: number
+}
+
+/** The pipeline output without an object URL — the URL is minted by the caller. */
+export interface ProcessedBlob {
+  blob: Blob
+  width: number
+  height: number
+  format: OutputFormat
+}
+
 /**
  * The full client-side pipeline: decode → (resize) → encode → Blob.
- * Shared by the resize, compress, and convert tools. Runs on the main thread
- * today; the boundary is intentionally a plain async fn so a worker can wrap it
- * later without changing callers.
+ * Returns a raw Blob (no object URL) so it can run inside a Web Worker — blob
+ * URLs minted in a worker are not reliably usable from the main document, so
+ * the caller mints the URL on the main thread.
  */
-export async function processImage(
-  source: SourceImage,
+export async function processToBlob(
+  input: ProcessInput,
   options: ProcessOptions,
-): Promise<ProcessResult> {
-  const bitmap = await decode(source.file)
+): Promise<ProcessedBlob> {
+  const bitmap = await decode(input.file)
   try {
     const target = options.resize
       ? computeDimensions(
-          { width: source.width, height: source.height },
+          { width: input.width, height: input.height },
           options.resize,
         )
-      : { width: source.width, height: source.height }
+      : { width: input.width, height: input.height }
 
     const canvas = drawToCanvas(bitmap, target)
     const blob = await canvasToBlob(
@@ -41,13 +57,33 @@ export async function processImage(
 
     return {
       blob,
-      url: URL.createObjectURL(blob),
       width: target.width,
       height: target.height,
-      size: blob.size,
       format: options.encode.format,
     }
   } finally {
     bitmap.close()
+  }
+}
+
+/**
+ * Main-thread convenience wrapper around {@link processToBlob} that mints the
+ * result object URL. Used as the fallback when a Web Worker is unavailable.
+ */
+export async function processImage(
+  source: SourceImage,
+  options: ProcessOptions,
+): Promise<ProcessResult> {
+  const { blob, width, height, format } = await processToBlob(
+    { file: source.file, width: source.width, height: source.height },
+    options,
+  )
+  return {
+    blob,
+    url: URL.createObjectURL(blob),
+    width,
+    height,
+    size: blob.size,
+    format,
   }
 }

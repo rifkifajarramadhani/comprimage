@@ -3,8 +3,8 @@
 > Fast, privacy-first, 100% client-side image toolkit (resize / compress / convert) on TanStack Start.
 > This document tracks what's built and what's next so implementation can continue.
 
-**Last updated:** 2026-07-05
-**Scope completed:** Phases 1–3 (foundation + core tools)
+**Last updated:** 2026-07-06
+**Scope completed:** Phases 1–4 (foundation + core tools + Web Worker) and the Phase 3 batch tool
 
 ---
 
@@ -37,13 +37,34 @@
 | `convert.ts` | `FORMATS`, `formatMeta`, `isLossy`, `withExtension`. |
 | `compress.ts` | `DEFAULT_QUALITY`, `qualityPercent`, `compressionStats`, `supportsQuality`. |
 | `download.ts` | `downloadBlob(blob, filename)`. |
-| `zip.ts` | `zipBlobs(entries)` via fflate — **scaffolded, not yet wired to UI**. |
+| `zip.ts` | `zipBlobs(entries)` via fflate — wired into the batch "Download all" button. |
 | `source.ts` | `createSourceImage(file)`, `releaseSourceImage`, accepted types, max size. |
 | `format.ts` | `formatBytes`. |
 
 - `src/hooks/useImageProcessor.ts` — debounced auto-run on source/options change, revokes stale URLs.
-  Boundary is a plain async fn so a Web Worker can slot in later without changing callers.
+  Now dispatches to the Web Worker pool (below); the same interface, off the main thread.
 - `src/types/image.ts` — `SourceImage`, `ProcessResult`, `ResizeOptions`, `EncodeOptions`, `OutputFormat`.
+
+### 6. Web Worker offload (Phase 4)
+- `process.ts` split: `processToBlob(input, opts)` is the URL-free core (worker-safe); `processImage`
+  wraps it on the main thread and mints the object URL (used as the fallback).
+- `src/workers/image.worker.ts` — module worker running `processToBlob`, returns the Blob (cloneable).
+- `src/workers/imagePool.ts` — lazily-spawned pool sized to `min(hardwareConcurrency, 4)`, correlates
+  requests by id, queues when saturated, mints URLs on the main thread. Falls back to `processImage`
+  when `Worker`/`OffscreenCanvas` are unavailable. Shared by both the single-tool hook and batch queue.
+- Emitted as a separate `image.worker-*.js` chunk; initial JS unchanged at **~117 KB gzip**.
+
+### 7. Shared image store + Batch (Phase 3 remainder)
+- `src/stores/imageStore.ts` — Zustand store holding the single-tool `SourceImage`. Owns the object-URL
+  lifecycle. The home dropzone now hands the image to `/resize` (no re-drop), and it persists across
+  resize/compress/convert. `ToolWorkspace` reads from the store instead of local state.
+- `src/components/upload/Dropzone.tsx` — optional `multiple` + `onImages` for multi-file drops.
+- `src/hooks/useImageQueue.ts` — owns a source list, processes each through the worker pool, tracks
+  per-item status/result. Incremental (adding a file encodes only that file; changing options re-encodes
+  all), revokes result URLs + releases sources on removal/unmount.
+- `src/routes/batch.tsx` + `src/components/batch/BatchList.tsx` — multi-file workspace with per-item
+  progress, aggregate savings, individual downloads, and **Download all (ZIP)** wiring `lib/zip.ts`.
+- `Batch` added to the nav (`SiteHeader`). `zustand` added as a dependency.
 
 ### 5. Tools + components
 - `src/components/ToolWorkspace.tsx` — shared workspace (source state + processing + preview/stats/download).
@@ -54,7 +75,10 @@
 
 ### Verification status
 - `tsc --noEmit` clean · `npm run test` **10/10 pass** · `npm run lint` clean · `npm run build` succeeds.
+- Build emits a code-split `image.worker-*.js` chunk; initial JS unchanged at ~117 KB gzip.
 - Preview server serves fully-rendered black-canvas HTML; all custom utilities compiled into CSS.
+- **Still needs a manual browser click-through** (jsdom has no canvas/worker): verify the home→resize
+  hand-off, worker output parity + UI responsiveness on a large photo, and the batch ZIP download.
 
 ---
 
@@ -65,24 +89,14 @@
    photo in a browser (`npm run dev`), and confirm the Network tab shows **zero image egress**.
 2. **Deploy fallback** — SPA mode emits `dist/client/_shell.html`. For GitHub Pages, serve it as the
    index/404 fallback (copy to `index.html` or configure the host).
-3. **Home dropzone doesn't carry the image** — it decodes then navigates to `/resize`, so the user re-drops.
-   Fix by lifting `SourceImage` into a shared store (Zustand or React context) shared across routes.
-4. shadcn `button` (outline) and `slider` thumb still carry small `shadow-*` classes from the primitives —
+3. shadcn `button` (outline) and `slider` thumb still carry small `shadow-*` classes from the primitives —
    minor deviation from the "no drop shadows" rule if you want strict fidelity.
+4. **Batch has no resize control yet** — it applies format + quality to all files (compress/convert use
+   cases). Add `ResizeControls` to `batch.tsx` if bulk-resize is wanted.
 
 ---
 
 ## 🔜 Deferred (later phases)
-
-### Phase 4 — Performance
-- Move `processImage` into a **Web Worker** (`src/workers/image.worker.ts`) using OffscreenCanvas +
-  transferables. The `useImageProcessor` hook is the only file that should change.
-- `useImageQueue` hook for concurrency control.
-
-### Phase 3 remainder — Batch
-- Multi-file upload + queue + progress UI.
-- Wire `lib/zip.ts` `zipBlobs` into a "Download all" ZIP button.
-- `src/routes/batch.tsx`.
 
 ### Phase 5 — PWA & settings
 - Service worker / offline, install prompt.

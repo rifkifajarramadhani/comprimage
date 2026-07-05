@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
-import type { SourceImage } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
 import { useImageProcessor } from '#/hooks/useImageProcessor.ts'
-import { releaseSourceImage } from '#/lib/source.ts'
+import { useImageStore } from '#/stores/imageStore.ts'
 import { Container } from '#/components/layout/Container.tsx'
 import { Dropzone } from '#/components/upload/Dropzone.tsx'
 import { BeforeAfter } from '#/components/preview/BeforeAfter.tsx'
@@ -30,15 +28,13 @@ export function ToolWorkspace({
   /** The tool's control panel. */
   controls: React.ReactNode
 }) {
-  const [source, setSource] = useState<SourceImage | null>(null)
+  // Source lives in a shared store so it carries over from the home dropzone
+  // and persists when switching between resize / compress / convert. The store
+  // owns the object-URL lifecycle (release on replace/clear).
+  const source = useImageStore((s) => s.source)
+  const setSource = useImageStore((s) => s.setSource)
+  const clearSource = useImageStore((s) => s.clearSource)
   const { result, isProcessing, error } = useImageProcessor(source, options)
-
-  // Release the source object URL when replaced/unmounted.
-  useEffect(() => {
-    return () => {
-      if (source) releaseSourceImage(source)
-    }
-  }, [source])
 
   return (
     <section className="atmos-glow">
@@ -59,10 +55,7 @@ export function ToolWorkspace({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    releaseSourceImage(source)
-                    setSource(null)
-                  }}
+                  onClick={clearSource}
                 >
                   <RotateCcw />
                   New image

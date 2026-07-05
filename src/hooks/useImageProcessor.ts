@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ProcessResult, SourceImage } from '#/types/image.ts'
-import { processImage } from '#/lib/process.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
+import { processInPool } from '#/workers/imagePool.ts'
 
 interface State {
   result: ProcessResult | null
@@ -14,8 +14,9 @@ interface State {
  * Debounced so dragging the quality slider does not re-encode on every pixel.
  * Revokes superseded result object URLs to avoid leaks.
  *
- * The pipeline is a plain async fn (see lib/process.ts); when a Web Worker is
- * added later, only this hook changes — callers keep the same interface.
+ * Processing runs in a Web Worker pool (see workers/imagePool.ts) so encoding
+ * large images never blocks the UI; the pool falls back to the main thread when
+ * workers are unavailable. Callers keep the same interface.
  */
 export function useImageProcessor(
   source: SourceImage | null,
@@ -40,7 +41,7 @@ export function useImageProcessor(
     const runId = ++runIdRef.current
     setState((s) => ({ ...s, isProcessing: true, error: null }))
 
-    processImage(source, options)
+    processInPool(source, options)
       .then((result) => {
         // A newer run superseded this one — discard.
         if (runId !== runIdRef.current) {

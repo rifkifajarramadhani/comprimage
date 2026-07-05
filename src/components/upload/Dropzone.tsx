@@ -11,9 +11,15 @@ import { cn } from '#/lib/utils.ts'
 
 export function Dropzone({
   onImage,
+  onImages,
+  multiple = false,
   className,
 }: {
-  onImage: (image: SourceImage) => void
+  /** Single-image callback (default mode). */
+  onImage?: (image: SourceImage) => void
+  /** Multi-image callback, used when `multiple` is set. */
+  onImages?: (images: Array<SourceImage>) => void
+  multiple?: boolean
   className?: string
 }) {
   const [error, setError] = useState<string | null>(null)
@@ -22,28 +28,39 @@ export function Dropzone({
   const onDrop = useCallback(
     async (accepted: Array<File>) => {
       if (accepted.length === 0) return
-      const file = accepted[0]
       setError(null)
-      if (file.size > MAX_FILE_BYTES) {
-        setError('That file is larger than 50 MB.')
-        return
+      const withinLimit = accepted.filter((f) => f.size <= MAX_FILE_BYTES)
+      if (withinLimit.length < accepted.length) {
+        setError(
+          multiple
+            ? 'Some files were larger than 50 MB and skipped.'
+            : 'That file is larger than 50 MB.',
+        )
       }
+      if (withinLimit.length === 0) return
+
       setBusy(true)
       try {
-        onImage(await createSourceImage(file))
+        const files = multiple ? withinLimit : withinLimit.slice(0, 1)
+        const images = await Promise.all(files.map((f) => createSourceImage(f)))
+        if (multiple) {
+          onImages?.(images)
+        } else {
+          onImage?.(images[0])
+        }
       } catch {
         setError('Could not read that image. Try a different file.')
       } finally {
         setBusy(false)
       }
     },
-    [onImage],
+    [multiple, onImage, onImages],
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: Object.fromEntries(ACCEPTED_TYPES.map((t) => [t, []])),
-    multiple: false,
+    multiple,
   })
 
   return (
@@ -69,7 +86,11 @@ export function Dropzone({
         )}
         <div>
           <p className="text-ink font-medium">
-            {isDragActive ? 'Drop it here' : 'Drop an image, or click to browse'}
+            {isDragActive
+              ? 'Drop it here'
+              : multiple
+                ? 'Drop images, or click to browse'
+                : 'Drop an image, or click to browse'}
           </p>
           <p className="text-ash mt-1 text-sm">
             JPG, PNG, WebP, AVIF or GIF · processed on your device

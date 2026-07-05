@@ -6,6 +6,7 @@ const NAV = [
   { to: '/resize', label: 'Resize' },
   { to: '/compress', label: 'Compress' },
   { to: '/convert', label: 'Convert' },
+  { to: '/batch', label: 'Batch' },
 ] as const
 
 /** nav-bar — 64px, wordmark left, centered nav links, hairline bottom border. */

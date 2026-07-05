@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowRight, Maximize2, Minimize2, Repeat } from 'lucide-react'
 import { Container } from '#/components/layout/Container.tsx'
 import { Dropzone } from '#/components/upload/Dropzone.tsx'
+import { useImageStore } from '#/stores/imageStore.ts'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -28,6 +29,7 @@ const TOOLS = [
 
 function Home() {
   const navigate = useNavigate()
+  const setSource = useImageStore((s) => s.setSource)
 
   return (
     <>
@@ -50,9 +52,10 @@ function Home() {
 
           <div className="mx-auto mt-10 max-w-xl text-left">
             <Dropzone
-              onImage={() =>
+              onImage={(image) => {
+                setSource(image)
                 navigate({ to: '/resize' })
-              }
+              }}
             />
             <p className="text-ash mt-3 text-center text-sm">
               Drop an image to start resizing, or pick a tool below.
