@@ -8,7 +8,7 @@ import {
   maxConcurrency,
 } from '#/lib/settings.ts'
 import { applyTheme, cacheThemePreference } from '#/lib/theme.ts'
-import { imagePool } from '#/workers/imagePool.ts'
+import { imagePool } from '#/workers/image-pool.ts'
 
 /**
  * Persisted user preferences: theme, worker concurrency, and the defaults that
@@ -16,7 +16,7 @@ import { imagePool } from '#/workers/imagePool.ts'
  * changes re-paint the document, concurrency changes resize the shared worker
  * pool — so both the single-tool and batch flows stay in sync automatically.
  *
- * Follows the selector-per-field consumption style of stores/imageStore.ts.
+ * Follows the selector-per-field consumption style of stores/image-store.ts.
  */
 interface SettingsStore extends AppSettings {
   setTheme: (theme: ThemePreference) => void

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ProcessResult, SourceImage } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
-import { processInPool } from '#/workers/imagePool.ts'
+import { processInPool } from '#/workers/image-pool.ts'
 
 interface State {
   result: ProcessResult | null
@@ -14,7 +14,7 @@ interface State {
  * Debounced so dragging the quality slider does not re-encode on every pixel.
  * Revokes superseded result object URLs to avoid leaks.
  *
- * Processing runs in a Web Worker pool (see workers/imagePool.ts) so encoding
+ * Processing runs in a Web Worker pool (see workers/image-pool.ts) so encoding
  * large images never blocks the UI; the pool falls back to the main thread when
  * workers are unavailable. Callers keep the same interface.
  */

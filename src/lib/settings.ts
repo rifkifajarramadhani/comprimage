@@ -4,7 +4,7 @@ import { DEFAULT_QUALITY } from '#/lib/compress.ts'
 /** User-facing theme preference. `system` follows the OS setting. */
 export type ThemePreference = 'system' | 'light' | 'dark'
 
-/** Persisted application preferences (see stores/settingsStore.ts). */
+/** Persisted application preferences (see stores/settings-store.ts). */
 export interface AppSettings {
   theme: ThemePreference
   /** Number of Web Workers in the processing pool. */

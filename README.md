@@ -1,35 +1,101 @@
-Welcome to your new TanStack Start app! 
+# Comprimage
 
-# Getting Started
+Fast, privacy-first image toolkit. Resize, compress, and convert images entirely in your browser — images never leave your device. No uploads, no accounts, no waiting. Installable as a PWA for offline use.
 
-To run this application:
+Live at **https://comprimage.rifkiramadhani.my.id**
 
-```bash
-npm install
-npm run dev
+## Features
+
+- **Resize** — scale by width, height, longest edge, or percentage; aspect ratio locked, upscaling blocked
+- **Compress** — quality slider with live savings preview at full resolution
+- **Convert** — move between JPG, PNG, WebP, and AVIF
+- **Batch** — queue multiple images and download results as a ZIP
+- **Settings** — theme preference, default output format/quality, worker concurrency
+- **PWA** — offline-capable via a Workbox-generated service worker
+
+## Tech stack
+
+- [TanStack Start](https://tanstack.com/start) (SPA/static mode), [TanStack Router](https://tanstack.com/router), React 19
+- Tailwind CSS 4, [shadcn/ui](https://ui.shadcn.com/) (Radix)
+- Zustand for image and settings state
+- Web Workers + Canvas API for image processing
+- Vitest, ESLint, Prettier
+- Bun for install/build; Docker + nginx for production
+
+## Project structure
+
+```
+comprimage/
+├── docker/nginx/          # nginx SPA config
+├── public/                # PWA manifest, robots, SW message handler
+├── scripts/               # post-build Workbox SW generation
+├── src/
+│   ├── components/        # UI by domain (upload, preview, controls, batch, pwa, layout, ui)
+│   ├── hooks/             # useImageProcessor, useImageQueue
+│   ├── lib/               # pipeline (process, resize, compress, convert, canvas, zip, download)
+│   ├── routes/            # file-based pages (index, resize, compress, convert, batch, settings)
+│   ├── stores/            # imageStore, settingsStore
+│   ├── types/             # shared image/pipeline types
+│   └── workers/           # image.worker.ts + ImagePool
+├── Dockerfile
+├── docker-compose.yml
+└── DESIGN.md              # design tokens / visual system reference
 ```
 
-# Building For Production
+### Routes
 
-To build this application for production:
+| Path        | Purpose                                      |
+| ----------- | -------------------------------------------- |
+| `/`         | Home — dropzone and tool overview            |
+| `/resize`   | Scale images with live before/after preview  |
+| `/compress` | Shrink file size at the same dimensions      |
+| `/convert`  | Change output format                         |
+| `/batch`    | Process multiple images, download as ZIP     |
+| `/settings` | Theme, defaults, and worker concurrency      |
 
-```bash
-npm run build
+## How it works
+
+Users drop or select images via a shared dropzone. The source image is held in a Zustand store so it carries across the resize, compress, and convert tools. Each tool builds `ProcessOptions` from its controls and hands them to a shared `ToolWorkspace`, which drives processing through an `ImagePool` of Web Workers.
+
+The pipeline is **decode → (optional resize) → encode → Blob**, implemented in `src/lib/process.ts`. Object URLs are minted on the main thread (blob URLs created inside a worker are not reliably usable from the document). When Web Workers or OffscreenCanvas are unavailable, processing falls back to the main thread.
+
+```mermaid
+flowchart LR
+  Dropzone --> imageStore
+  imageStore --> ToolWorkspace
+  ToolWorkspace --> ImagePool
+  ImagePool --> Worker["Web Worker"]
+  Worker --> processPipeline["decode → resize? → encode"]
+  processPipeline --> Preview["BeforeAfter + Stats"]
+  Preview --> Download
 ```
 
-# Deployment (Docker)
+## Getting started
 
-Comprimage is a **100% client-side static SPA** (no backend, no database) — image
-processing runs entirely in the browser. It ships as a two-stage container: a **Bun**
-build stage produces the static output (`dist/client`), and an **nginx** stage serves it.
+Requires [Bun](https://bun.sh/).
+
+```bash
+bun install
+bun run dev        # http://localhost:3000
+bun run build
+bun run preview
+bun run test
+bun run lint
+bun run format
+bun run check
+```
+
+`build` runs `vite build` then `bun scripts/generate-sw.mjs` to emit the service worker. The Docker image uses Bun for the same reason — the `oven/bun` image has no `node` binary.
+
+## Deployment (Docker)
+
+Comprimage is a **100% client-side static SPA** (no backend, no database). It ships as a two-stage container: a **Bun** build stage produces the static output (`dist/client`), and an **nginx** stage serves it.
 
 Files:
 
-- `Dockerfile` — `oven/bun:1` build stage (`bun install --frozen-lockfile` + `bun run build`)
-  → `nginx:1.27-alpine` serving `dist/client`.
-- `docker/nginx/comprimage.conf` — SPA fallback to the prerendered `_shell.html`, `no-cache`
-  headers for `sw.js` / `manifest.json`, and long-lived caching for hashed `/assets`.
-- `docker-compose.yml` — a single `web` service on the external `edge` network.
+- `Dockerfile` — `oven/bun:1` build stage (`bun install --frozen-lockfile` + `bun run build`) → `nginx:1.27-alpine` serving `dist/client`
+- `docker/nginx/comprimage.conf` — SPA fallback to the prerendered `_shell.html`, `no-cache` headers for `sw.js` / `manifest.json`, and long-lived caching for hashed `/assets`
+- `docker-compose.yml` — a single `web` service on the external `edge` network
 
 Build and run:
 
@@ -38,206 +104,10 @@ docker compose build
 docker compose up -d
 ```
 
-The app is served at **https://comprimage.rifkiramadhani.my.id**. TLS and routing are
-handled by the shared **Traefik** edge proxy (Let's Encrypt); the container joins the
-`edge` Docker network and publishes **no** host ports. Routing is configured via the
-Traefik labels on the `web` service in `docker-compose.yml`.
+TLS and routing are handled by the shared **Traefik** edge proxy (Let's Encrypt). The container joins the `edge` Docker network and publishes **no** host ports; routing is configured via Traefik labels on the `web` service in `docker-compose.yml`.
 
-> Note: the container builds with Bun, so the `build` script uses `bun scripts/generate-sw.mjs`
-> (the `oven/bun` image has no `node` binary). `vite.config.ts` pins the prerender preview
-> server to `127.0.0.1` so the build's prerender step is reliable inside containers.
+> `vite.config.ts` pins the prerender preview server to `127.0.0.1` so the build's prerender step is reliable inside containers.
 
-## Testing
+### CI
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
-
-```bash
-npm run test
-```
-
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `npm install @tailwindcss/vite tailwindcss -D`
-
-## Linting & Formatting
-
-
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
-
-```bash
-npm run lint
-npm run format
-npm run check
-```
-
-
-## Shadcn
-
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
-
-```bash
-pnpm dlx shadcn@latest add button
-```
-
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+On push to `main`, [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds the Docker image, pushes it to GHCR (`ghcr.io/rifkifajarramadhani/comprimage`), and SSH-deploys to the production host.

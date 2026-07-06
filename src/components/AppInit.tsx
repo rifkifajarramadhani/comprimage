@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import { useSettingsStore } from '#/stores/settingsStore.ts'
+import { useSettingsStore } from '#/stores/settings-store.ts'
 import { applyTheme, watchSystemTheme } from '#/lib/theme.ts'
-import { imagePool } from '#/workers/imagePool.ts'
+import { imagePool } from '#/workers/image-pool.ts'
 
 /**
  * Applies persisted settings once the store has rehydrated from localStorage:

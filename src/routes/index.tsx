@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowRight, Maximize2, Minimize2, Repeat } from 'lucide-react'
 import { Container } from '#/components/layout/Container.tsx'
 import { Dropzone } from '#/components/upload/Dropzone.tsx'
-import { useImageStore } from '#/stores/imageStore.ts'
+import { useImageStore } from '#/stores/image-store.ts'
 
 export const Route = createFileRoute('/')({ component: Home })
 

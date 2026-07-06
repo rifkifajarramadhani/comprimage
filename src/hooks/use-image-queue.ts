@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ProcessResult, SourceImage } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
 import { releaseSourceImage } from '#/lib/source.ts'
-import { imagePool } from '#/workers/imagePool.ts'
+import { imagePool } from '#/workers/image-pool.ts'
 
 export type QueueStatus = 'pending' | 'processing' | 'done' | 'error'
 

@@ -1,5 +1,5 @@
 import { CheckCircle2, Download, Loader2, TriangleAlert, X } from 'lucide-react'
-import type { QueueItem } from '#/hooks/useImageQueue.ts'
+import type { QueueItem } from '#/hooks/use-image-queue.ts'
 import { compressionStats } from '#/lib/compress.ts'
 import { withExtension } from '#/lib/convert.ts'
 import { downloadBlob } from '#/lib/download.ts'
