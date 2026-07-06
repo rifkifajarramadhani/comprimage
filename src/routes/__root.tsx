@@ -1,12 +1,15 @@
 import {
   HeadContent,
+  Link,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
+import { ArrowRight } from 'lucide-react'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import { Container } from '../components/layout/Container.tsx'
 import { SiteHeader } from '../components/layout/SiteHeader.tsx'
 import { SiteFooter } from '../components/layout/SiteFooter.tsx'
 import { AppInit } from '../components/AppInit.tsx'
@@ -41,7 +44,33 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   shellComponent: RootDocument,
+  notFoundComponent: NotFoundPage,
 })
+
+function NotFoundPage() {
+  return (
+    <section className="atmos-glow">
+      <Container className="py-12 sm:py-16">
+        <header className="max-w-2xl">
+          <p className="kicker mb-3">404</p>
+          <h1 className="display-title text-5xl sm:text-6xl">Page not found</h1>
+          <p className="text-charcoal mt-4 text-lg">
+            That URL doesn&apos;t match anything here. Check the address or head
+            back to the home page.
+          </p>
+          <div className="mt-8">
+            <Link
+              to="/"
+              className="text-mute hover:text-ink inline-flex items-center gap-1 text-sm transition-colors"
+            >
+              Back to home <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </header>
+      </Container>
+    </section>
+  )
+}
 
 // Runs before first paint: resolve the persisted theme (mirrored to a standalone
 // key by the settings store) and set the register class on <html> so there is no
