@@ -1,5 +1,6 @@
 services:
   web:
+    image: ghcr.io/rifkifajarramadhani/comprimage:${IMAGE_TAG:-latest}
     build:
       context: .
       target: prod
