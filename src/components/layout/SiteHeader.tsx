@@ -1,6 +1,9 @@
 import { Link } from '@tanstack/react-router'
+import { DropdownMenu } from 'radix-ui'
+import { Menu } from 'lucide-react'
 import { Container } from './Container.tsx'
 import { InstallButton } from '#/components/pwa/InstallButton.tsx'
+import { Button } from '#/components/ui/button.tsx'
 
 const NAV = [
   { to: '/', label: 'Home' },
@@ -26,7 +29,8 @@ export function SiteHeader() {
           Comprimage
         </Link>
 
-        <div className="flex items-center gap-7">
+        {/* Desktop nav */}
+        <div className="hidden items-center gap-7 md:flex">
           <nav className="flex items-center gap-7 text-sm">
             {NAV.map((item) => (
               <Link
@@ -41,6 +45,45 @@ export function SiteHeader() {
             ))}
           </nav>
           <InstallButton />
+        </div>
+
+        {/* Mobile nav */}
+        <div className="flex items-center gap-2 md:hidden">
+          <InstallButton />
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Menu />
+              </Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                align="end"
+                sideOffset={8}
+                className="z-50 flex min-w-40 flex-col gap-1 rounded-lg p-2 text-sm backdrop-blur-sm"
+                style={{
+                  background: 'var(--header-bg)',
+                  border: '1px solid var(--hairline-strong)',
+                }}
+              >
+                {NAV.map((item) => (
+                  <DropdownMenu.Item key={item.to} asChild>
+                    <Link
+                      to={item.to}
+                      className="nav-link nav-link-mobile rounded-md px-3 py-2 outline-none"
+                      activeProps={{
+                        className:
+                          'nav-link nav-link-mobile is-active rounded-md px-3 py-2 outline-none',
+                      }}
+                      activeOptions={{ exact: item.to === '/' }}
+                    >
+                      {item.label}
+                    </Link>
+                  </DropdownMenu.Item>
+                ))}
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
         </div>
       </Container>
     </header>

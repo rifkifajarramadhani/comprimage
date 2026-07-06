@@ -325,6 +325,18 @@ code,
   background: var(--ink);
 }
 
+/* Vertical dropdown variant (mobile menu): no underline, glow the active item. */
+.nav-link-mobile.is-active::after {
+  content: none;
+}
+.nav-link-mobile:hover {
+  background: var(--hairline);
+}
+.nav-link-mobile.is-active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 .rise-in {
   animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
