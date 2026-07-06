@@ -24,9 +24,17 @@ const { count, size, warnings } = await generateSW({
   cleanupOutdatedCaches: true,
   // Route/worker chunks can exceed the 2 MiB default.
   maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-  // Serve the prerendered home document for uncached navigations (offline / deep
-  // links); the client router then hydrates and resolves the actual route.
-  navigateFallback: '/index.html',
+  // No navigateFallback: this is a prerendered multi-page site, not a single-shell
+  // SPA. Each route has its own document (/resize/index.html, …), and clean-URL
+  // navigations like `/resize` do NOT match the precache entry, so a fallback of
+  // `/index.html` would serve the HOME document for every tool route. The client
+  // then hydrates home's DOM + router state against a `/resize` URL — a hydration
+  // mismatch (React #418) and a TanStack Router "Invariant failed" — before
+  // re-rendering to the correct route. It also broke direct hits on /sitemap.xml
+  // and /robots.txt (served index.html → blank until hard reload). Without a
+  // fallback, navigations resolve from precache when matched, else from the
+  // network (nginx serves the correct per-route HTML via try_files). Trade-off:
+  // deep-linking to a not-yet-visited route while fully offline won't resolve.
   runtimeCaching: [
     {
       // Google Fonts stylesheet + font files, so type still renders offline.

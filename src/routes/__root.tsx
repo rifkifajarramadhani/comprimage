@@ -93,7 +93,12 @@ const NO_FOUC_SCRIPT = `(function(){try{var p=localStorage.getItem('comprimage-t
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    // NO_FOUC_SCRIPT below rewrites this class (dark/light) before React hydrates,
+    // so the prerendered `dark` won't match the client for light-theme users.
+    // Theme is applied purely via CSS on this class, so nothing in the DOM below
+    // actually differs — suppress the expected <html>-level hydration mismatch
+    // (otherwise React throws #418 and discards the prerendered tree).
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: NO_FOUC_SCRIPT }} />
