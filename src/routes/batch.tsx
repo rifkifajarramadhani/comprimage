@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { Layers, Loader2, Package } from 'lucide-react'
-import type { OutputFormat } from '#/types/image.ts'
+import type { EncodeOptions } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
-import { compressionStats, supportsQuality } from '#/lib/compress.ts'
+import { compressionStats } from '#/lib/compress.ts'
 import { withExtension } from '#/lib/convert.ts'
 import { useSettingsStore } from '#/stores/settings-store.ts'
 import { downloadBlob } from '#/lib/download.ts'
@@ -22,14 +22,23 @@ export const Route = createFileRoute('/batch')({ component: BatchPage })
 
 function BatchPage() {
   const settings = useSettingsStore.getState()
-  const [format, setFormat] = useState<OutputFormat>(settings.defaultFormat)
-  const [quality, setQuality] = useState(settings.defaultQuality)
+  const [encode, setEncode] = useState<EncodeOptions>({
+    format: settings.defaultFormat,
+    quality: settings.defaultQuality,
+  })
   const [zipping, setZipping] = useState(false)
 
-  const options: ProcessOptions = { encode: { format, quality } }
+  const options: ProcessOptions = { encode }
 
-  const { items, doneCount, errorCount, isProcessing, addSources, remove, clear } =
-    useImageQueue(options)
+  const {
+    items,
+    doneCount,
+    errorCount,
+    isProcessing,
+    addSources,
+    remove,
+    clear,
+  } = useImageQueue(options)
 
   // Aggregate savings across everything that has finished.
   const totals = useMemo(() => {
@@ -66,7 +75,9 @@ function BatchPage() {
       <Container className="py-12 sm:py-16">
         <header className="mb-10 max-w-2xl">
           <p className="kicker mb-3">Batch</p>
-          <h1 className="display-title text-5xl sm:text-6xl">Process in bulk</h1>
+          <h1 className="display-title text-5xl sm:text-6xl">
+            Process in bulk
+          </h1>
           <p className="text-charcoal mt-4 text-lg">
             Drop a whole folder of images, apply one setting to all of them, and
             download the results as a ZIP — every byte stays on your device.
@@ -84,12 +95,12 @@ function BatchPage() {
               )}
             </div>
             <div className="grid gap-5">
-              <FormatSelect value={format} onChange={setFormat} label="Convert to" />
-              <CompressControls
-                quality={quality}
-                onQualityChange={setQuality}
-                disabled={!supportsQuality(format)}
+              <FormatSelect
+                value={encode.format}
+                onChange={(format) => setEncode((e) => ({ ...e, format }))}
+                label="Convert to"
               />
+              <CompressControls value={encode} onChange={setEncode} />
             </div>
 
             <div className="mt-6">

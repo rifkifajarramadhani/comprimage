@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import type { OutputFormat, ResizeOptions } from '#/types/image.ts'
+import type { EncodeOptions, ResizeOptions } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
-import { supportsQuality } from '#/lib/compress.ts'
 import { useSettingsStore } from '#/stores/settings-store.ts'
 import { ToolWorkspace } from '#/components/ToolWorkspace.tsx'
 import { ResizeControls } from '#/components/controls/ResizeControls.tsx'
@@ -19,13 +18,12 @@ function ResizePage() {
     keepAspectRatio: true,
     preventUpscaling: settings.preventUpscale,
   })
-  const [format, setFormat] = useState<OutputFormat>(settings.defaultFormat)
-  const [quality, setQuality] = useState(settings.defaultQuality)
+  const [encode, setEncode] = useState<EncodeOptions>({
+    format: settings.defaultFormat,
+    quality: settings.defaultQuality,
+  })
 
-  const options: ProcessOptions = {
-    resize,
-    encode: { format, quality },
-  }
+  const options: ProcessOptions = { resize, encode }
 
   return (
     <ToolWorkspace
@@ -37,12 +35,11 @@ function ResizePage() {
         <div className="grid gap-5">
           <ResizeControls options={resize} onChange={setResize} />
           <div style={{ borderTop: '1px solid var(--hairline)' }} />
-          <FormatSelect value={format} onChange={setFormat} />
-          <CompressControls
-            quality={quality}
-            onQualityChange={setQuality}
-            disabled={!supportsQuality(format)}
+          <FormatSelect
+            value={encode.format}
+            onChange={(format) => setEncode((e) => ({ ...e, format }))}
           />
+          <CompressControls value={encode} onChange={setEncode} />
         </div>
       }
     />

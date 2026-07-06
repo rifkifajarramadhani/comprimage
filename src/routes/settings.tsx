@@ -2,7 +2,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Monitor, Moon, RotateCcw, Sun } from 'lucide-react'
 import type { ThemePreference } from '#/lib/settings.ts'
 import { maxConcurrency } from '#/lib/settings.ts'
-import { supportsQuality } from '#/lib/compress.ts'
 import { useSettingsStore } from '#/stores/settings-store.ts'
 import { Container } from '#/components/layout/Container.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
@@ -127,9 +126,9 @@ function SettingsPage() {
                 label="Default output format"
               />
               <CompressControls
-                quality={defaultQuality}
-                onQualityChange={setDefaultQuality}
-                disabled={!supportsQuality(defaultFormat)}
+                value={{ format: defaultFormat, quality: defaultQuality }}
+                onChange={(next) => setDefaultQuality(next.quality)}
+                showAdvanced={false}
               />
               <label className="flex items-center justify-between">
                 <span className="text-sm font-medium">

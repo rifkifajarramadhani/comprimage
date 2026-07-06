@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
 import type { OutputFormat } from '#/types/image.ts'
 import { FORMATS } from '#/lib/convert.ts'
-import { supportsAvifEncode } from '#/lib/canvas.ts'
+import { supportsWasmEncode } from '#/lib/encode.ts'
 import { Label } from '#/components/ui/label.tsx'
 import {
   Select,
@@ -20,15 +19,9 @@ export function FormatSelect({
   onChange: (format: OutputFormat) => void
   label?: string
 }) {
-  const [avifOk, setAvifOk] = useState(false)
-
-  useEffect(() => {
-    supportsAvifEncode().then(setAvifOk)
-  }, [])
-
-  const options = FORMATS.filter(
-    (f) => f.format !== 'image/avif' || avifOk,
-  )
+  // AVIF/JXL are WASM-only; hide them if WebAssembly is unavailable.
+  const wasmOk = supportsWasmEncode()
+  const options = FORMATS.filter((f) => !f.requiresWasm || wasmOk)
 
   return (
     <div className="grid gap-2">

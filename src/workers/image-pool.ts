@@ -134,6 +134,7 @@ class ImagePool {
           height: data.height,
           size: data.blob.size,
           format: data.format,
+          chosenQuality: data.chosenQuality,
         })
       } else {
         pending.reject(new Error(data.error))

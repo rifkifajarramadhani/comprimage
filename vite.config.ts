@@ -12,6 +12,19 @@ import tailwindcss from '@tailwindcss/vite'
 // build it never emits sw.js — running workbox-build directly is deterministic.
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  // The @jsquash codecs resolve their `.wasm` binaries via `import.meta.url`.
+  // esbuild's dep pre-bundling rewrites that and breaks the lookup, so exclude
+  // them — each codec is dynamically imported and its wasm emitted as an asset.
+  optimizeDeps: {
+    exclude: [
+      '@jsquash/jpeg',
+      '@jsquash/png',
+      '@jsquash/oxipng',
+      '@jsquash/webp',
+      '@jsquash/avif',
+      '@jsquash/jxl',
+    ],
+  },
   // Pin the preview server (used by TanStack Start's prerender step) to IPv4.
   // In minimal containers `localhost` resolves to both 127.0.0.1 and ::1; the
   // preview server and the prerender fetch can otherwise pick different families,

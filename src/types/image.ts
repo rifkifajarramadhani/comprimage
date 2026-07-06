@@ -1,6 +1,10 @@
 /** Shared types for the image-processing pipeline. */
 
-export type OutputFormat = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif'
+export type OutputFormat =
+  'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif' | 'image/jxl'
+
+/** Chroma subsampling for lossy formats: '444' = full color, '420' = half. */
+export type ChromaSubsampling = '444' | '420'
 
 /** A source image the user has added, with its decoded intrinsic dimensions. */
 export interface SourceImage {
@@ -26,6 +30,8 @@ export interface ProcessResult {
   /** Output size in bytes. */
   size: number
   format: OutputFormat
+  /** Quality (0–1) auto mode settled on, if it was used. */
+  chosenQuality?: number
 }
 
 /** How the resize target is expressed. */
@@ -45,6 +51,17 @@ export interface ResizeOptions {
 
 export interface EncodeOptions {
   format: OutputFormat
-  /** 0–1 for lossy formats (jpeg/webp/avif). Ignored for png. */
+  /** 0–1 for lossy formats (jpeg/webp/avif/jxl). Ignored for png. */
   quality: number
+  /** Encode losslessly (webp/avif/jxl). PNG is always lossless. */
+  lossless?: boolean
+  /** 0–1 encode effort: higher trades CPU for a smaller file. Codec-mapped. */
+  effort?: number
+  /** Chroma subsampling for lossy formats (jpeg/avif). Defaults to '420'. */
+  subsampling?: ChromaSubsampling
+  /**
+   * When set, ignore `quality` and instead search for the smallest quality
+   * whose output stays above this perceptual score (0–1 SSIM). See process.ts.
+   */
+  auto?: { targetSsim: number }
 }

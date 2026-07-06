@@ -14,6 +14,7 @@ import { Route as ResizeRouteImport } from './routes/resize'
 import { Route as ConvertRouteImport } from './routes/convert'
 import { Route as CompressRouteImport } from './routes/compress'
 import { Route as BatchRouteImport } from './routes/batch'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SettingsRoute = SettingsRouteImport.update({
@@ -41,6 +42,11 @@ const BatchRoute = BatchRouteImport.update({
   path: '/batch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -49,6 +55,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/batch': typeof BatchRoute
   '/compress': typeof CompressRoute
   '/convert': typeof ConvertRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/batch': typeof BatchRoute
   '/compress': typeof CompressRoute
   '/convert': typeof ConvertRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/batch': typeof BatchRoute
   '/compress': typeof CompressRoute
   '/convert': typeof ConvertRoute
@@ -74,12 +83,27 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/batch' | '/compress' | '/convert' | '/resize' | '/settings'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/batch'
+    | '/compress'
+    | '/convert'
+    | '/resize'
+    | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/batch' | '/compress' | '/convert' | '/resize' | '/settings'
+  to:
+    | '/'
+    | '/about'
+    | '/batch'
+    | '/compress'
+    | '/convert'
+    | '/resize'
+    | '/settings'
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/batch'
     | '/compress'
     | '/convert'
@@ -89,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   BatchRoute: typeof BatchRoute
   CompressRoute: typeof CompressRoute
   ConvertRoute: typeof ConvertRoute
@@ -133,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -145,6 +177,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   BatchRoute: BatchRoute,
   CompressRoute: CompressRoute,
   ConvertRoute: ConvertRoute,

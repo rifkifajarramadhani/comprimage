@@ -1,9 +1,17 @@
 import type { ProcessResult, SourceImage } from '#/types/image.ts'
-import { compressionStats } from '#/lib/compress.ts'
+import { compressionStats, qualityPercent } from '#/lib/compress.ts'
 import { formatMeta } from '#/lib/convert.ts'
 import { formatBytes } from '#/lib/format.ts'
 
-function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
+function Stat({
+  label,
+  value,
+  accent,
+}: {
+  label: string
+  value: string
+  accent?: string
+}) {
   return (
     <div className="surface-card px-4 py-3">
       <div className="kicker">{label}</div>
@@ -32,6 +40,12 @@ export function Stats({
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       <Stat label="Dimensions" value={`${result.width} × ${result.height}`} />
       <Stat label="Format" value={formatMeta(result.format).label} />
+      {result.chosenQuality !== undefined && (
+        <Stat
+          label="Auto quality"
+          value={`${qualityPercent(result.chosenQuality)}`}
+        />
+      )}
       <Stat
         label="New size"
         value={formatBytes(result.size)}

@@ -1,5 +1,3 @@
-import type { OutputFormat } from '#/types/image.ts'
-
 /** Sensible default quality (0–1) per lossy format. */
 export const DEFAULT_QUALITY = 0.8
 
@@ -17,9 +15,4 @@ export function compressionStats(originalSize: number, newSize: number) {
   const savings = originalSize - newSize
   const savedPercent = originalSize > 0 ? (savings / originalSize) * 100 : 0
   return { ratio, savings, savedPercent }
-}
-
-/** Whether quality controls apply to this output format. */
-export function supportsQuality(format: OutputFormat): boolean {
-  return format !== 'image/png'
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { computeDimensions } from './resize.ts'
+import { computeDimensions, resizeSteps } from './resize.ts'
 import type { ResizeOptions } from '#/types/image.ts'
 
 const source = { width: 4000, height: 3000 } // 4:3
@@ -16,9 +16,9 @@ function opts(partial: Partial<ResizeOptions>): ResizeOptions {
 
 describe('computeDimensions', () => {
   it('width mode keeps aspect ratio', () => {
-    expect(computeDimensions(source, opts({ mode: 'width', value: 2000 }))).toEqual(
-      { width: 2000, height: 1500 },
-    )
+    expect(
+      computeDimensions(source, opts({ mode: 'width', value: 2000 })),
+    ).toEqual({ width: 2000, height: 1500 })
   })
 
   it('height mode keeps aspect ratio', () => {
@@ -96,5 +96,51 @@ describe('computeDimensions', () => {
     )
     expect(result.width).toBeGreaterThanOrEqual(1)
     expect(result.height).toBeGreaterThanOrEqual(1)
+  })
+})
+
+describe('resizeSteps', () => {
+  it('returns a single direct draw for upscales', () => {
+    expect(
+      resizeSteps({ width: 100, height: 100 }, { width: 400, height: 400 }),
+    ).toEqual([{ width: 400, height: 400 }])
+  })
+
+  it('returns a single direct draw for downscales within 2x', () => {
+    expect(
+      resizeSteps({ width: 1000, height: 800 }, { width: 600, height: 480 }),
+    ).toEqual([{ width: 600, height: 480 }])
+  })
+
+  it('halves progressively for large downscales, ending exactly at target', () => {
+    const steps = resizeSteps(
+      { width: 4000, height: 3000 },
+      { width: 400, height: 300 },
+    )
+    expect(steps).toEqual([
+      { width: 2000, height: 1500 },
+      { width: 1000, height: 750 },
+      { width: 500, height: 375 },
+      { width: 400, height: 300 },
+    ])
+  })
+
+  it('never steps below the target in either dimension', () => {
+    const target = { width: 300, height: 300 }
+    for (const s of resizeSteps({ width: 5000, height: 5000 }, target)) {
+      expect(s.width).toBeGreaterThanOrEqual(target.width)
+      expect(s.height).toBeGreaterThanOrEqual(target.height)
+    }
+  })
+
+  it('does not duplicate the target when the last halving lands on it', () => {
+    const steps = resizeSteps(
+      { width: 1600, height: 1600 },
+      { width: 400, height: 400 },
+    )
+    expect(steps).toEqual([
+      { width: 800, height: 800 },
+      { width: 400, height: 400 },
+    ])
   })
 })

@@ -17,13 +17,14 @@ export type WorkerResponse =
       width: number
       height: number
       format: OutputFormat
+      chosenQuality?: number
     }
   | { id: number; ok: false; error: string }
 
 self.addEventListener('message', (event: MessageEvent<WorkerRequest>) => {
   const { id, input, options } = event.data
   processToBlob(input, options)
-    .then(({ blob, width, height, format }) => {
+    .then(({ blob, width, height, format, chosenQuality }) => {
       const message: WorkerResponse = {
         id,
         ok: true,
@@ -31,6 +32,7 @@ self.addEventListener('message', (event: MessageEvent<WorkerRequest>) => {
         width,
         height,
         format,
+        chosenQuality,
       }
       // Blob is structured-cloneable; no transferable needed.
       self.postMessage(message)

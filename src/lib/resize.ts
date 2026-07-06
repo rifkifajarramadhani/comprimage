@@ -64,3 +64,43 @@ export function computeDimensions(
     height: Math.max(1, Math.round(height)),
   }
 }
+
+/**
+ * The sequence of intermediate sizes for a high-quality **progressive** resize.
+ *
+ * A single canvas `drawImage` that shrinks by a large factor aliases badly
+ * because the browser samples too few source pixels per destination pixel.
+ * Halving repeatedly (each step never drops below 50%) keeps every step within
+ * the resampler's sweet spot, which suppresses moiré and preserves detail —
+ * the same trick pica/browsers use internally.
+ *
+ * Returns the ordered list of sizes to draw through, **excluding** the source
+ * and **including** the final target as the last entry. For upscales or small
+ * downscales (≥50%) it returns just `[target]` (a single direct draw). Pure and
+ * canvas-free so it can be unit-tested.
+ */
+export function resizeSteps(
+  source: Dimensions,
+  target: Dimensions,
+): Dimensions[] {
+  const steps: Dimensions[] = []
+  let { width, height } = source
+
+  // Only downscaling benefits from stepping; stop once halving would overshoot
+  // the target in either dimension, then let the caller draw straight to target.
+  while (width > target.width * 2 && height > target.height * 2) {
+    width = Math.max(target.width, Math.round(width / 2))
+    height = Math.max(target.height, Math.round(height / 2))
+    steps.push({ width, height })
+  }
+
+  const last = steps[steps.length - 1]
+  if (
+    steps.length === 0 ||
+    last.width !== target.width ||
+    last.height !== target.height
+  ) {
+    steps.push({ width: target.width, height: target.height })
+  }
+  return steps
+}

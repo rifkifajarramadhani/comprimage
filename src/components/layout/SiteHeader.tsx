@@ -11,6 +11,7 @@ const NAV = [
   { to: '/compress', label: 'Compress' },
   { to: '/convert', label: 'Convert' },
   { to: '/batch', label: 'Batch' },
+  { to: '/about', label: 'About' },
   { to: '/settings', label: 'Settings' },
 ] as const
 

@@ -29,7 +29,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         name: 'description',
         content:
-          'Fast, privacy-first, 100% client-side image toolkit — resize, compress, and convert images without uploading them anywhere.',
+          'Fast, privacy-first, 100% client-side image toolkit — resize, compress, and convert with modern codecs (MozJPEG, WebP, AVIF, JPEG XL) for strong compression at minimal quality loss, without uploading anything.',
       },
       { title: 'Comprimage — Image Toolkit' },
     ],

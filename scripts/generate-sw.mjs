@@ -37,6 +37,18 @@ const { count, size, warnings } = await generateSW({
         cacheableResponse: { statuses: [0, 200] },
       },
     },
+    {
+      // @jsquash codec `.wasm` binaries are loaded lazily per format. Cache each
+      // on first use so subsequent (and offline) encodes don't refetch it — and
+      // so the install stays lean instead of precaching every codec upfront.
+      urlPattern: /\.wasm$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'jsquash-codecs',
+        expiration: { maxEntries: 12, maxAgeSeconds: 60 * 60 * 24 * 365 },
+        cacheableResponse: { statuses: [0, 200] },
+      },
+    },
   ],
 })
 

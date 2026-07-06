@@ -5,7 +5,8 @@ import type {
   ResizeOptions,
   SourceImage,
 } from '#/types/image.ts'
-import { canvasToBlob, decode, drawToCanvas } from './canvas.ts'
+import { decode, drawToCanvas } from './canvas.ts'
+import { encodeCanvas } from './encode.ts'
 import { computeDimensions } from './resize.ts'
 
 export interface ProcessOptions {
@@ -27,6 +28,8 @@ export interface ProcessedBlob {
   width: number
   height: number
   format: OutputFormat
+  /** Quality (0–1) actually used — set by auto mode so the UI can show it. */
+  chosenQuality?: number
 }
 
 /**
@@ -49,17 +52,14 @@ export async function processToBlob(
       : { width: input.width, height: input.height }
 
     const canvas = drawToCanvas(bitmap, target)
-    const blob = await canvasToBlob(
-      canvas,
-      options.encode.format,
-      options.encode.quality,
-    )
+    const { blob, quality } = await encodeCanvas(canvas, options.encode)
 
     return {
       blob,
       width: target.width,
       height: target.height,
       format: options.encode.format,
+      chosenQuality: options.encode.auto ? quality : undefined,
     }
   } finally {
     bitmap.close()
@@ -74,7 +74,7 @@ export async function processImage(
   source: SourceImage,
   options: ProcessOptions,
 ): Promise<ProcessResult> {
-  const { blob, width, height, format } = await processToBlob(
+  const { blob, width, height, format, chosenQuality } = await processToBlob(
     { file: source.file, width: source.width, height: source.height },
     options,
   )
@@ -85,5 +85,6 @@ export async function processImage(
     height,
     size: blob.size,
     format,
+    chosenQuality,
   }
 }
