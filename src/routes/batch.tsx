@@ -17,8 +17,18 @@ import { BatchList } from '#/components/batch/BatchList.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
 import { CompressControls } from '#/components/controls/CompressControls.tsx'
 import { Button } from '#/components/ui/button.tsx'
+import { seo } from '#/lib/site.ts'
 
-export const Route = createFileRoute('/batch')({ component: BatchPage })
+export const Route = createFileRoute('/batch')({
+  component: BatchPage,
+  head: () =>
+    seo({
+      path: '/batch',
+      title: 'Batch compress & convert images — Comprimage',
+      description:
+        'Process many images at once — compress and convert a whole batch with modern codecs and download them as a zip. Runs entirely in your browser, nothing uploaded.',
+    }),
+})
 
 function BatchPage() {
   const settings = useSettingsStore.getState()

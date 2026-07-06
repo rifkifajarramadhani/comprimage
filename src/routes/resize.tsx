@@ -7,8 +7,18 @@ import { ToolWorkspace } from '#/components/ToolWorkspace.tsx'
 import { ResizeControls } from '#/components/controls/ResizeControls.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
 import { CompressControls } from '#/components/controls/CompressControls.tsx'
+import { seo } from '#/lib/site.ts'
 
-export const Route = createFileRoute('/resize')({ component: ResizePage })
+export const Route = createFileRoute('/resize')({
+  component: ResizePage,
+  head: () =>
+    seo({
+      path: '/resize',
+      title: 'Resize images in your browser — Comprimage',
+      description:
+        'Resize images by width, height, longest edge, or percentage, with aspect ratio locked and progressive downscaling that keeps edges crisp. 100% client-side — nothing is uploaded.',
+    }),
+})
 
 function ResizePage() {
   const settings = useSettingsStore.getState()

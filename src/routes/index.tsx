@@ -3,8 +3,18 @@ import { ArrowRight, Maximize2, Minimize2, Repeat } from 'lucide-react'
 import { Container } from '#/components/layout/Container.tsx'
 import { Dropzone } from '#/components/upload/Dropzone.tsx'
 import { useImageStore } from '#/stores/image-store.ts'
+import { seo } from '#/lib/site.ts'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  component: Home,
+  head: () =>
+    seo({
+      path: '/',
+      title: 'Comprimage — Image Toolkit',
+      description:
+        'Fast, privacy-first, 100% client-side image toolkit — resize, compress, and convert with modern codecs (MozJPEG, WebP, AVIF, JPEG XL) for strong compression at minimal quality loss, without uploading anything.',
+    }),
+})
 
 const TOOLS = [
   {

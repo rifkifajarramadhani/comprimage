@@ -33,10 +33,19 @@ const config = defineConfig({
   plugins: [
     devtools(),
     tailwindcss(),
-    // SPA / static mode: emit a static SPA shell so the app deploys to any
-    // static host (GitHub Pages, Cloudflare, Netlify) with no backend. All
-    // image processing runs client-side, so there is nothing to render server-side.
-    tanstackStart({ spa: { enabled: true } }),
+    // Static prerender: bake every route to its own <route>/index.html at build
+    // time so the app deploys to any static host (GitHub Pages, Cloudflare, nginx)
+    // with no backend, and crawlers get real content (a populated <main>) plus
+    // per-route metadata instead of an empty shell. All page content is static
+    // JSX; the browser-only work (Web Workers, OffscreenCanvas, localStorage) is
+    // lazy / in effects, so it doesn't run during prerender. crawlLinks follows
+    // <Link>s to discover every route; failOnError turns any accidental
+    // render-time browser-API access into a build failure instead of a silent gap.
+    // (SPA shell mode is intentionally not used — it left the home route's <main>
+    // empty; see git history.)
+    tanstackStart({
+      prerender: { enabled: true, crawlLinks: true, failOnError: true },
+    }),
     viteReact(),
   ],
 })

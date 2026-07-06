@@ -16,6 +16,7 @@ import { AppInit } from '../components/AppInit.tsx'
 import { PwaUpdater } from '../components/pwa/PwaUpdater.tsx'
 
 import appCss from '../styles.css?url'
+import { SITE_NAME, SITE_URL, absUrl } from '../lib/site.ts'
 
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -23,18 +24,31 @@ interface MyRouterContext {
   queryClient: QueryClient
 }
 
+const ROOT_TITLE = 'Comprimage — Image Toolkit'
+const ROOT_DESCRIPTION =
+  'Fast, privacy-first, 100% client-side image toolkit — resize, compress, and convert with modern codecs (MozJPEG, WebP, AVIF, JPEG XL) for strong compression at minimal quality loss, without uploading anything.'
+const OG_IMAGE = absUrl('/logo512.png')
+
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { name: 'theme-color', content: '#000000' },
-      {
-        name: 'description',
-        content:
-          'Fast, privacy-first, 100% client-side image toolkit — resize, compress, and convert with modern codecs (MozJPEG, WebP, AVIF, JPEG XL) for strong compression at minimal quality loss, without uploading anything.',
-      },
-      { title: 'Comprimage — Image Toolkit' },
+      { name: 'description', content: ROOT_DESCRIPTION },
+      { title: ROOT_TITLE },
+      // Open Graph — defaults; routes may override og:title/og:description/og:url.
+      { property: 'og:type', content: 'website' },
+      { property: 'og:site_name', content: SITE_NAME },
+      { property: 'og:title', content: ROOT_TITLE },
+      { property: 'og:description', content: ROOT_DESCRIPTION },
+      { property: 'og:url', content: `${SITE_URL}/` },
+      { property: 'og:image', content: OG_IMAGE },
+      // Twitter Card
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: ROOT_TITLE },
+      { name: 'twitter:description', content: ROOT_DESCRIPTION },
+      { name: 'twitter:image', content: OG_IMAGE },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },

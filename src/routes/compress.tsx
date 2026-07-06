@@ -6,8 +6,18 @@ import { useSettingsStore } from '#/stores/settings-store.ts'
 import { ToolWorkspace } from '#/components/ToolWorkspace.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
 import { CompressControls } from '#/components/controls/CompressControls.tsx'
+import { seo } from '#/lib/site.ts'
 
-export const Route = createFileRoute('/compress')({ component: CompressPage })
+export const Route = createFileRoute('/compress')({
+  component: CompressPage,
+  head: () =>
+    seo({
+      path: '/compress',
+      title: 'Compress images in your browser — Comprimage',
+      description:
+        'Shrink image file size at full resolution with modern codecs (MozJPEG, WebP, AVIF, JPEG XL) and a target-quality mode that finds the smallest file that still looks right. 100% client-side.',
+    }),
+})
 
 function CompressPage() {
   const settings = useSettingsStore.getState()

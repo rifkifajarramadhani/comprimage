@@ -8,8 +8,9 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "build": "vite build && bun scripts/generate-sw.mjs",
+    "build": "vite build && bun scripts/generate-sw.mjs && bun scripts/generate-sitemap.mjs",
     "generate-sw": "node scripts/generate-sw.mjs",
+    "generate-sitemap": "bun scripts/generate-sitemap.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint",

@@ -1,22 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 import { Container } from '#/components/layout/Container.tsx'
+import { seo } from '#/lib/site.ts'
 
 export const Route = createFileRoute('/about')({
   component: AboutPage,
-  head: () => ({
-    meta: [
-      {
-        title:
-          'How Comprimage works — strong compression, minimal quality loss',
-      },
-      {
-        name: 'description',
-        content:
-          'Comprimage uses modern WASM image codecs (MozJPEG, WebP, AVIF, JPEG XL), progressive resizing, and a perceptual target-quality mode to shrink images with minimal visible quality loss — all client-side.',
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      path: '/about',
+      title: 'How Comprimage works — strong compression, minimal quality loss',
+      description:
+        'Comprimage uses modern WASM image codecs (MozJPEG, WebP, AVIF, JPEG XL), progressive resizing, and a perceptual target-quality mode to shrink images with minimal visible quality loss — all client-side.',
+    }),
 })
 
 function Section({

@@ -24,8 +24,9 @@ const { count, size, warnings } = await generateSW({
   cleanupOutdatedCaches: true,
   // Route/worker chunks can exceed the 2 MiB default.
   maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-  // SPA: serve the prerendered shell for uncached navigations.
-  navigateFallback: '/_shell.html',
+  // Serve the prerendered home document for uncached navigations (offline / deep
+  // links); the client router then hydrates and resolves the actual route.
+  navigateFallback: '/index.html',
   runtimeCaching: [
     {
       // Google Fonts stylesheet + font files, so type still renders offline.
