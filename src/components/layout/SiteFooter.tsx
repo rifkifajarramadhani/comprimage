@@ -1,24 +1,29 @@
+import { Link } from '@tanstack/react-router'
+import { ShieldCheck } from 'lucide-react'
 import { Container } from './Container.tsx'
 
-/** footer — black canvas, hairline top divider, single caption row. */
 export function SiteFooter() {
   return (
-    <footer
-      className="mt-24"
-      style={{ borderTop: '1px solid var(--divider-soft)' }}
-    >
-      <Container className="flex flex-col items-center justify-between gap-3 py-10 text-sm sm:flex-row">
-        <p className="text-ash">
-          Comprimage — images never leave your device.
+    <footer className="border-border mt-20 border-t">
+      <Container className="flex flex-col gap-5 py-8 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-muted-foreground flex items-center gap-2">
+          <ShieldCheck className="text-success size-4" aria-hidden />
+          Private, local image processing.
         </p>
-        <p className="text-ash flex items-center gap-2">
-          <span
-            aria-hidden
-            className="inline-block size-2 rounded-full"
-            style={{ background: 'var(--accent-green)' }}
-          />
-          100% client-side
-        </p>
+        <nav aria-label="Footer" className="flex items-center gap-5">
+          <Link
+            to="/about"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            About
+          </Link>
+          <Link
+            to="/settings"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Settings
+          </Link>
+        </nav>
       </Container>
     </footer>
   )

@@ -27,14 +27,13 @@ function ResizePage() {
 
   return (
     <ToolWorkspace
-      eyebrow="Resize"
       title="Resize images"
-      description="Scale by width, height, longest edge, or percentage — with aspect ratio locked and upscaling blocked by default."
+      description="Change dimensions while keeping the result crisp. Aspect ratio stays locked and upscaling is blocked by default."
       options={options}
       controls={
         <div className="grid gap-5">
           <ResizeControls options={resize} onChange={setResize} />
-          <div style={{ borderTop: '1px solid var(--hairline)' }} />
+          <div className="border-border border-t" />
           <FormatSelect
             value={encode.format}
             onChange={(format) => setEncode((e) => ({ ...e, format }))}

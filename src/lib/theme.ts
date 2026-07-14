@@ -7,7 +7,7 @@ export type ResolvedTheme = 'light' | 'dark'
 
 /** theme-color meta content per register (matches styles.css canvas). */
 const THEME_COLOR: Record<ResolvedTheme, string> = {
-  dark: '#000000',
+  dark: '#151722',
   light: '#ffffff',
 }
 

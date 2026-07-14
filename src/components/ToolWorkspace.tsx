@@ -1,91 +1,115 @@
-import { RotateCcw } from 'lucide-react'
+import { FileImage, RotateCcw, TriangleAlert } from 'lucide-react'
 import type { ProcessOptions } from '#/lib/process.ts'
 import { useImageProcessor } from '#/hooks/use-image-processor.ts'
 import { useImageStore } from '#/stores/image-store.ts'
+import { formatBytes } from '#/lib/format.ts'
 import { Container } from '#/components/layout/Container.tsx'
+import { PageIntro } from '#/components/layout/PageIntro.tsx'
 import { Dropzone } from '#/components/upload/Dropzone.tsx'
 import { BeforeAfter } from '#/components/preview/BeforeAfter.tsx'
 import { Stats } from '#/components/statistics/Stats.tsx'
 import { DownloadButton } from '#/components/common/DownloadButton.tsx'
+import { PrivacyNote } from '#/components/common/PrivacyNote.tsx'
 import { Button } from '#/components/ui/button.tsx'
 
-/**
- * Shared workspace for the resize / compress / convert tools. Owns the source
- * image + processing, and renders the controls the specific tool passes in.
- */
+function sourceFormat(type: string): string {
+  const value = type.split('/')[1] ?? type
+  return value === 'jpeg' ? 'JPG' : value.toUpperCase()
+}
+
 export function ToolWorkspace({
-  eyebrow,
   title,
   description,
   options,
   controls,
 }: {
-  eyebrow: string
   title: string
   description: string
-  /** Built by the tool from its own control state. */
   options: ProcessOptions
-  /** The tool's control panel. */
   controls: React.ReactNode
 }) {
-  // Source lives in a shared store so it carries over from the home dropzone
-  // and persists when switching between resize / compress / convert. The store
-  // owns the object-URL lifecycle (release on replace/clear).
   const source = useImageStore((s) => s.source)
   const setSource = useImageStore((s) => s.setSource)
   const clearSource = useImageStore((s) => s.clearSource)
   const { result, isProcessing, error } = useImageProcessor(source, options)
 
   return (
-    <section className="atmos-glow">
-      <Container className="py-12 sm:py-16">
-        <header className="mb-10 max-w-2xl">
-          <p className="kicker mb-3">{eyebrow}</p>
-          <h1 className="display-title text-5xl sm:text-6xl">{title}</h1>
-          <p className="text-charcoal mt-4 text-lg">{description}</p>
-        </header>
+    <Container className="py-10 sm:py-12">
+      <PageIntro title={title} description={description} className="mb-8" />
 
-        {!source ? (
+      {!source ? (
+        <div className="mx-auto max-w-4xl">
           <Dropzone onImage={setSource} />
-        ) : (
-          <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-            <aside className="surface-card h-fit p-6">
-              <div className="mb-5 flex items-center justify-between">
-                <span className="kicker">Options</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearSource}
+        </div>
+      ) : (
+        <div className="grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <aside className="surface-subtle overflow-hidden lg:sticky lg:top-20">
+            <div className="border-border flex items-start gap-3 border-b p-5">
+              <span className="bg-brand-soft text-brand flex size-10 shrink-0 items-center justify-center rounded-lg">
+                <FileImage className="size-5" aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p
+                  className="text-foreground truncate text-sm font-semibold"
+                  title={source.file.name}
                 >
-                  <RotateCcw />
-                  New image
-                </Button>
+                  {source.file.name}
+                </p>
+                <p className="text-muted-foreground mono mt-1 text-xs">
+                  {source.width} × {source.height} · {sourceFormat(source.type)}{' '}
+                  · {formatBytes(source.size)}
+                </p>
               </div>
-              {controls}
-              <div className="mt-6">
+            </div>
+
+            <div className="flex flex-col gap-6 p-5">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={clearSource}
+              >
+                <RotateCcw data-icon="inline-start" />
+                New image
+              </Button>
+
+              <div className="border-border flex flex-col gap-5 border-t pt-5">
+                {controls}
+              </div>
+
+              <div className="border-border flex flex-col gap-3 border-t pt-5">
                 <DownloadButton
                   source={source}
                   result={result}
                   disabled={isProcessing}
                 />
+                <PrivacyNote compact />
               </div>
-              {error && (
-                <p
-                  className="mt-3 text-sm"
-                  style={{ color: 'var(--accent-red)' }}
-                >
-                  {error}
-                </p>
-              )}
-            </aside>
 
-            <div className="grid gap-4">
-              {result && <Stats source={source} result={result} />}
-              <BeforeAfter source={source} result={result} />
+              {error && (
+                <div
+                  role="alert"
+                  className="bg-danger-soft text-danger flex items-start gap-2 rounded-lg p-3 text-sm"
+                >
+                  <TriangleAlert
+                    className="mt-0.5 size-4 shrink-0"
+                    aria-hidden
+                  />
+                  <span>{error}</span>
+                </div>
+              )}
             </div>
+          </aside>
+
+          <div className="flex min-w-0 flex-col gap-4">
+            {result ? (
+              <Stats source={source} result={result} />
+            ) : (
+              <div className="skeleton h-[74px] rounded-xl" aria-hidden />
+            )}
+            <BeforeAfter source={source} result={result} />
           </div>
-        )}
-      </Container>
-    </section>
+        </div>
+      )}
+    </Container>
   )
 }

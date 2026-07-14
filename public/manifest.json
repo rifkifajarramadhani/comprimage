@@ -5,21 +5,23 @@
   "icons": [
     {
       "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "16x16 32x32 48x48 64x64",
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "src": "icons/comprimage-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
-      "src": "logo512.png",
+      "src": "icons/comprimage-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
     },
     {
-      "src": "logo512.png",
+      "src": "icons/comprimage-maskable-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"
@@ -31,6 +33,6 @@
   "display": "standalone",
   "orientation": "any",
   "categories": ["utilities", "photo", "productivity"],
-  "theme_color": "#000000",
-  "background_color": "#000000"
+  "theme_color": "#151722",
+  "background_color": "#ffffff"
 }

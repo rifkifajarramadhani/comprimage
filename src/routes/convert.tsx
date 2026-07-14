@@ -20,9 +20,8 @@ function ConvertPage() {
 
   return (
     <ToolWorkspace
-      eyebrow="Convert"
       title="Convert formats"
-      description="Change between JPG, PNG, WebP, AVIF and JPEG XL. AVIF and JPEG XL use built-in WASM codecs."
+      description="Change between JPG, PNG, WebP, AVIF, and JPEG XL with local WebAssembly codecs."
       options={options}
       controls={
         <div className="grid gap-5">

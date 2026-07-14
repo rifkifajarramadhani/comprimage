@@ -13,28 +13,28 @@ function StatusBadge({ item }: { item: QueueItem }) {
       const smaller = savings > 0
       return (
         <span
-          className="mono inline-flex items-center gap-1.5 text-sm"
-          style={{ color: smaller ? 'var(--accent-green)' : 'var(--ink)' }}
+          className={
+            smaller
+              ? 'text-success mono inline-flex items-center gap-1.5 text-sm font-medium'
+              : 'text-foreground mono inline-flex items-center gap-1.5 text-sm font-medium'
+          }
         >
-          <CheckCircle2 className="size-4" />
+          <CheckCircle2 className="size-4" aria-hidden />
           {formatBytes(item.source.size)} → {formatBytes(item.result!.size)}
         </span>
       )
     }
     case 'error':
       return (
-        <span
-          className="inline-flex items-center gap-1.5 text-sm"
-          style={{ color: 'var(--accent-red)' }}
-        >
-          <TriangleAlert className="size-4" />
+        <span className="text-danger inline-flex items-center gap-1.5 text-sm font-medium">
+          <TriangleAlert className="size-4" aria-hidden />
           {item.error ?? 'Failed'}
         </span>
       )
     default:
       return (
-        <span className="text-ash inline-flex items-center gap-1.5 text-sm">
-          <Loader2 className="size-4 animate-spin" />
+        <span className="text-muted-foreground inline-flex items-center gap-1.5 text-sm">
+          <Loader2 className="size-4 animate-spin" aria-hidden />
           {item.status === 'processing' ? 'Processing…' : 'Queued'}
         </span>
       )
@@ -49,20 +49,25 @@ export function BatchList({
   onRemove: (id: string) => void
 }) {
   return (
-    <ul className="grid gap-3">
+    <ul
+      aria-label="Batch queue"
+      className="surface-subtle divide-border overflow-hidden divide-y"
+    >
       {items.map((item) => (
         <li
           key={item.source.id}
-          className="surface-card flex items-center gap-4 p-3"
+          className="flex min-h-18 items-center gap-3 p-3 sm:gap-4 sm:px-4"
         >
           <img
             src={item.source.url}
             alt=""
-            className="size-12 shrink-0 rounded-md object-cover"
-            style={{ border: '1px solid var(--hairline)' }}
+            className="border-border size-12 shrink-0 rounded-md border object-cover"
           />
           <div className="min-w-0 flex-1">
-            <p className="text-ink truncate text-sm font-medium">
+            <p
+              className="text-foreground truncate text-sm font-semibold"
+              title={item.source.file.name}
+            >
               {item.source.file.name}
             </p>
             <div className="mt-1">
@@ -73,7 +78,7 @@ export function BatchList({
           {item.status === 'done' && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() =>
                 downloadBlob(
                   item.result!.blob,
@@ -82,16 +87,16 @@ export function BatchList({
               }
               aria-label={`Download ${item.source.file.name}`}
             >
-              <Download />
+              <Download aria-hidden />
             </Button>
           )}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => onRemove(item.source.id)}
             aria-label={`Remove ${item.source.file.name}`}
           >
-            <X />
+            <X aria-hidden />
           </Button>
         </li>
       ))}

@@ -4,7 +4,7 @@ import {
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
-import { ArrowRight } from 'lucide-react'
+import { ArrowLeft, ImageOff } from 'lucide-react'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
@@ -28,7 +28,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { name: 'theme-color', content: '#000000' },
+      { name: 'theme-color', content: '#ffffff' },
       {
         name: 'description',
         content:
@@ -39,8 +39,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     links: [
       { rel: 'stylesheet', href: appCss },
       { rel: 'manifest', href: '/manifest.json' },
-      { rel: 'icon', href: '/favicon.ico' },
-      { rel: 'apple-touch-icon', href: '/logo192.png' },
+      {
+        rel: 'icon',
+        href: '/comprimage-mark.svg',
+        type: 'image/svg+xml',
+      },
+      { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
     ],
   }),
   shellComponent: RootDocument,
@@ -49,37 +54,36 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function NotFoundPage() {
   return (
-    <section className="atmos-glow">
-      <Container className="py-12 sm:py-16">
-        <header className="max-w-2xl">
-          <p className="kicker mb-3">404</p>
-          <h1 className="display-title text-5xl sm:text-6xl">Page not found</h1>
-          <p className="text-charcoal mt-4 text-lg">
-            That URL doesn&apos;t match anything here. Check the address or head
-            back to the home page.
-          </p>
-          <div className="mt-8">
-            <Link
-              to="/"
-              className="text-mute hover:text-ink inline-flex items-center gap-1 text-sm transition-colors"
-            >
-              Back to home <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </header>
-      </Container>
-    </section>
+    <Container className="py-16 sm:py-24">
+      <div className="mx-auto flex max-w-xl flex-col items-center text-center">
+        <span className="bg-brand-soft text-brand flex size-14 items-center justify-center rounded-xl">
+          <ImageOff className="size-7" aria-hidden />
+        </span>
+        <h1 className="page-title mt-6">Page not found</h1>
+        <p className="page-description mt-4">
+          That URL doesn&apos;t match anything here. Check the address or head
+          back to the home page.
+        </p>
+        <Link
+          to="/"
+          className="bg-primary text-primary-foreground mt-8 inline-flex h-11 items-center gap-2 rounded-md px-5 text-sm font-semibold shadow-[var(--control-shadow)]"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          Back to home
+        </Link>
+      </div>
+    </Container>
   )
 }
 
 // Runs before first paint: resolve the persisted theme (mirrored to a standalone
 // key by the settings store) and set the register class on <html> so there is no
 // dark→light flash on reload. Kept dependency-free — it can't import modules.
-const NO_FOUC_SCRIPT = `(function(){try{var p=localStorage.getItem('comprimage-theme')||'system';var d=p==='dark'||(p!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.remove('light','dark');c.add(d?'dark':'light');}catch(e){}})();`
+const NO_FOUC_SCRIPT = `(function(){try{var p=localStorage.getItem('comprimage-theme')||'system';var d=p==='dark'||(p!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.remove('light','dark');c.add(d?'dark':'light');var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',d?'#151722':'#ffffff');}catch(e){}})();`
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: NO_FOUC_SCRIPT }} />

@@ -1,6 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
-import { Layers, Loader2, Package } from 'lucide-react'
+import {
+  CheckCircle2,
+  Images,
+  Layers3,
+  Loader2,
+  Package,
+  TriangleAlert,
+} from 'lucide-react'
 import type { EncodeOptions } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
 import { compressionStats } from '#/lib/compress.ts'
@@ -12,6 +19,8 @@ import { zipBlobs } from '#/lib/zip.ts'
 import type { ZipEntry } from '#/lib/zip.ts'
 import { useImageQueue } from '#/hooks/use-image-queue.ts'
 import { Container } from '#/components/layout/Container.tsx'
+import { PageIntro } from '#/components/layout/PageIntro.tsx'
+import { PrivacyNote } from '#/components/common/PrivacyNote.tsx'
 import { Dropzone } from '#/components/upload/Dropzone.tsx'
 import { BatchList } from '#/components/batch/BatchList.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
@@ -71,82 +80,101 @@ function BatchPage() {
   }
 
   return (
-    <section className="atmos-glow">
-      <Container className="py-12 sm:py-16">
-        <header className="mb-10 max-w-2xl">
-          <p className="kicker mb-3">Batch</p>
-          <h1 className="display-title text-5xl sm:text-6xl">
-            Process in bulk
-          </h1>
-          <p className="text-charcoal mt-4 text-lg">
-            Drop a whole folder of images, apply one setting to all of them, and
-            download the results as a ZIP — every byte stays on your device.
-          </p>
-        </header>
+    <Container className="py-10 sm:py-12">
+      <PageIntro
+        title="Process images in bulk"
+        description="Apply one output setting to a group of images and download the finished files together as a ZIP."
+        className="mb-8"
+      />
 
-        <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-          <aside className="surface-card h-fit p-6">
-            <div className="mb-5 flex items-center justify-between">
-              <span className="kicker">Options</span>
-              {items.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={clear}>
-                  Clear all
-                </Button>
-              )}
-            </div>
-            <div className="grid gap-5">
-              <FormatSelect
-                value={encode.format}
-                onChange={(format) => setEncode((e) => ({ ...e, format }))}
-                label="Convert to"
-              />
-              <CompressControls value={encode} onChange={setEncode} />
-            </div>
-
-            <div className="mt-6">
+      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        <aside className="surface-subtle h-fit overflow-hidden lg:sticky lg:top-20">
+          <div className="border-border flex items-center justify-between border-b px-5 py-4">
+            <span className="text-foreground flex items-center gap-2 text-sm font-semibold">
+              <Layers3 className="text-brand size-4" aria-hidden />
+              Batch options
+            </span>
+            {items.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={clear}>
+                Clear all
+              </Button>
+            )}
+          </div>
+          <div className="flex flex-col gap-5 p-5">
+            <FormatSelect
+              value={encode.format}
+              onChange={(format) => setEncode((e) => ({ ...e, format }))}
+              label="Convert to"
+            />
+            <CompressControls value={encode} onChange={setEncode} />
+            <div className="border-border border-t pt-5">
               <Button
                 size="lg"
                 className="w-full"
                 disabled={doneCount === 0 || isProcessing || zipping}
                 onClick={downloadAll}
               >
-                {zipping ? <Loader2 className="animate-spin" /> : <Package />}
+                {zipping ? (
+                  <Loader2 className="animate-spin" data-icon="inline-start" />
+                ) : (
+                  <Package data-icon="inline-start" />
+                )}
                 {zipping ? 'Zipping…' : `Download all (${doneCount})`}
               </Button>
             </div>
-          </aside>
-
-          <div className="grid content-start gap-4">
-            <Dropzone multiple onImages={addSources} />
-
-            {items.length > 0 && (
-              <>
-                <div className="text-charcoal flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Layers className="text-mute size-4" />
-                    {doneCount} of {items.length} done
-                    {isProcessing && (
-                      <Loader2 className="text-mute size-4 animate-spin" />
-                    )}
-                  </span>
-                  {totals.savings > 0 && (
-                    <span style={{ color: 'var(--accent-green)' }}>
-                      Saved {formatBytes(totals.savings)} (
-                      {totals.savedPercent.toFixed(0)}%)
-                    </span>
-                  )}
-                  {errorCount > 0 && (
-                    <span style={{ color: 'var(--accent-red)' }}>
-                      {errorCount} failed
-                    </span>
-                  )}
-                </div>
-                <BatchList items={items} onRemove={remove} />
-              </>
-            )}
+            <PrivacyNote compact />
           </div>
+        </aside>
+
+        <div className="flex min-w-0 flex-col gap-4">
+          <Dropzone multiple onImages={addSources} />
+
+          {items.length === 0 ? (
+            <div className="text-muted-foreground flex items-start gap-3 px-2 py-2 text-sm">
+              <Images
+                className="text-brand mt-0.5 size-5 shrink-0"
+                aria-hidden
+              />
+              <p>
+                Add several images at once. They will be processed in parallel
+                using the settings on the left.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div
+                role="status"
+                className="surface-subtle flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 text-sm"
+              >
+                <span className="text-foreground inline-flex items-center gap-2 font-medium">
+                  <Layers3 className="text-brand size-4" aria-hidden />
+                  {doneCount} of {items.length} done
+                  {isProcessing && (
+                    <Loader2
+                      className="text-muted-foreground size-4 animate-spin"
+                      aria-hidden
+                    />
+                  )}
+                </span>
+                {totals.savings > 0 && (
+                  <span className="text-success inline-flex items-center gap-1.5 font-medium">
+                    <CheckCircle2 className="size-4" aria-hidden />
+                    Saved {formatBytes(totals.savings)} (
+                    {totals.savedPercent.toFixed(0)}%)
+                  </span>
+                )}
+                {errorCount > 0 && (
+                  <span className="text-danger inline-flex items-center gap-1.5 font-medium">
+                    <TriangleAlert className="size-4" aria-hidden />
+                    {errorCount} failed
+                  </span>
+                )}
+              </div>
+              <BatchList items={items} onRemove={remove} />
+            </>
+          )}
         </div>
-      </Container>
-    </section>
+      </div>
+    </Container>
   )
 }

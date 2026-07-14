@@ -5,6 +5,7 @@ import { Switch } from '#/components/ui/switch.tsx'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -40,10 +41,10 @@ export function CompressControls({
   return (
     <div className="grid gap-5">
       {autoAvailable && (
-        <label className="flex items-center justify-between">
-          <span className="text-sm font-medium">
+        <label className="flex min-h-11 items-center justify-between gap-4">
+          <span className="text-sm font-semibold">
             Auto quality
-            <span className="text-ash ml-1 font-normal">
+            <span className="text-muted-foreground ml-1 font-normal">
               (target visual quality)
             </span>
           </span>
@@ -64,9 +65,12 @@ export function CompressControls({
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="target-quality">Target quality</Label>
-            <span className="mono text-charcoal text-sm">
+            <output
+              htmlFor="target-quality"
+              className="mono text-muted-foreground text-sm"
+            >
               {Math.round(auto.targetSsim * 100)}
-            </span>
+            </output>
           </div>
           <Slider
             id="target-quality"
@@ -75,8 +79,9 @@ export function CompressControls({
             step={1}
             value={[Math.round(auto.targetSsim * 100)]}
             onValueChange={([v]) => patch({ auto: { targetSsim: v / 100 } })}
+            aria-label="Target visual quality"
           />
-          <p className="text-ash text-sm">
+          <p className="text-muted-foreground text-sm leading-6">
             We search for the smallest file that still looks this close to the
             original. The quality we settle on shows in the stats.
           </p>
@@ -85,9 +90,12 @@ export function CompressControls({
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="quality">Quality</Label>
-            <span className="mono text-charcoal text-sm">
+            <output
+              htmlFor="quality"
+              className="mono text-muted-foreground text-sm"
+            >
               {qualityApplies ? qualityPercent(value.quality) : 'lossless'}
-            </span>
+            </output>
           </div>
           <Slider
             id="quality"
@@ -97,8 +105,9 @@ export function CompressControls({
             value={[qualityPercent(value.quality)]}
             disabled={!qualityApplies}
             onValueChange={([v]) => patch({ quality: v / 100 })}
+            aria-label="Output quality"
           />
-          <p className="text-ash text-sm">
+          <p className="text-muted-foreground text-sm leading-6">
             {qualityApplies
               ? 'Lower quality means a smaller file.'
               : meta.lossy
@@ -109,11 +118,12 @@ export function CompressControls({
       )}
 
       {showAdvanced && meta.canLossless && (
-        <label className="flex items-center justify-between">
-          <span className="text-sm font-medium">Lossless</span>
+        <label className="flex min-h-11 items-center justify-between gap-4">
+          <span className="text-sm font-semibold">Lossless</span>
           <Switch
             checked={lossless}
             onCheckedChange={(checked) => patch({ lossless: checked })}
+            aria-label="Encode losslessly"
           />
         </label>
       )}
@@ -131,11 +141,15 @@ export function CompressControls({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="420">4:2:0 — smaller (recommended)</SelectItem>
-              <SelectItem value="444">4:4:4 — full color detail</SelectItem>
+              <SelectGroup>
+                <SelectItem value="420">
+                  4:2:0 — smaller (recommended)
+                </SelectItem>
+                <SelectItem value="444">4:4:4 — full color detail</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
-          <p className="text-ash text-sm">
+          <p className="text-muted-foreground text-sm leading-6">
             4:4:4 keeps sharp colored edges and text at a larger size.
           </p>
         </div>
@@ -145,9 +159,12 @@ export function CompressControls({
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="effort">Effort</Label>
-            <span className="mono text-charcoal text-sm">
+            <output
+              htmlFor="effort"
+              className="mono text-muted-foreground text-sm"
+            >
               {Math.round(effort * 100)}
-            </span>
+            </output>
           </div>
           <Slider
             id="effort"
@@ -156,8 +173,9 @@ export function CompressControls({
             step={5}
             value={[Math.round(effort * 100)]}
             onValueChange={([v]) => patch({ effort: v / 100 })}
+            aria-label="Encoding effort"
           />
-          <p className="text-ash text-sm">
+          <p className="text-muted-foreground text-sm leading-6">
             Higher effort spends more CPU for a smaller file at the same
             quality.
           </p>

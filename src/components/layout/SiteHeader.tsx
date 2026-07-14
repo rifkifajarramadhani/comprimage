@@ -1,87 +1,143 @@
 import { Link } from '@tanstack/react-router'
 import { DropdownMenu } from 'radix-ui'
-import { Menu } from 'lucide-react'
+import {
+  FileDown,
+  Info,
+  Layers3,
+  Maximize2,
+  Menu,
+  Repeat2,
+  Settings,
+} from 'lucide-react'
 import { Container } from './Container.tsx'
 import { InstallButton } from '#/components/pwa/InstallButton.tsx'
 import { Button } from '#/components/ui/button.tsx'
 
-const NAV = [
-  { to: '/', label: 'Home' },
-  { to: '/resize', label: 'Resize' },
-  { to: '/compress', label: 'Compress' },
-  { to: '/convert', label: 'Convert' },
-  { to: '/batch', label: 'Batch' },
-  { to: '/about', label: 'About' },
-  { to: '/settings', label: 'Settings' },
+const PRIMARY_NAV = [
+  { to: '/resize', label: 'Resize', icon: Maximize2 },
+  { to: '/compress', label: 'Compress', icon: FileDown },
+  { to: '/convert', label: 'Convert', icon: Repeat2 },
+  { to: '/batch', label: 'Batch', icon: Layers3 },
 ] as const
 
-/** nav-bar — 64px, wordmark left, centered nav links, hairline bottom border. */
-export function SiteHeader() {
+const SECONDARY_NAV = [
+  { to: '/about', label: 'About', icon: Info },
+  { to: '/settings', label: 'Settings', icon: Settings },
+] as const
+
+function NavLink({
+  item,
+}: {
+  item: (typeof PRIMARY_NAV)[number] | (typeof SECONDARY_NAV)[number]
+}) {
+  const Icon = item.icon
   return (
-    <header
-      className="sticky top-0 z-40 h-16 backdrop-blur-sm"
-      style={{
-        background: 'var(--header-bg)',
-        borderBottom: '1px solid var(--hairline)',
+    <Link
+      to={item.to}
+      className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors"
+      activeProps={{
+        className:
+          'bg-brand-soft text-brand-ink flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold',
       }}
     >
-      <Container className="flex h-16 items-center justify-between">
-        <Link to="/" className="text-ink text-lg font-semibold tracking-tight">
+      <Icon className="size-4" aria-hidden />
+      {item.label}
+    </Link>
+  )
+}
+
+export function SiteHeader() {
+  return (
+    <header className="border-border bg-[var(--header-bg)] sticky top-0 z-20 h-16 border-b backdrop-blur-md">
+      <Container className="flex h-16 max-w-[1440px] items-center gap-4">
+        <Link
+          to="/"
+          className="text-foreground focus-visible:ring-ring flex shrink-0 items-center gap-2 rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-[3px]"
+          activeOptions={{ exact: true }}
+        >
+          <img
+            src="/comprimage-mark.svg"
+            alt=""
+            width="36"
+            height="36"
+            className="size-9 shrink-0"
+            aria-hidden="true"
+          />
           Comprimage
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden items-center gap-7 md:flex">
-          <nav className="flex items-center gap-7 text-sm">
-            {NAV.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="nav-link"
-                activeProps={{ className: 'nav-link is-active' }}
-                activeOptions={{ exact: item.to === '/' }}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+        <nav
+          aria-label="Image tools"
+          className="ml-4 hidden items-center gap-1 lg:flex"
+        >
+          {PRIMARY_NAV.map((item) => (
+            <NavLink key={item.to} item={item} />
+          ))}
+        </nav>
+
+        <div className="ml-auto hidden items-center gap-1 lg:flex">
+          {SECONDARY_NAV.map((item) => (
+            <NavLink key={item.to} item={item} />
+          ))}
           <InstallButton />
         </div>
 
-        {/* Mobile nav */}
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="ml-auto flex items-center gap-2 lg:hidden">
           <InstallButton />
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Open menu">
-                <Menu />
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Open navigation menu"
+              >
+                <Menu aria-hidden />
               </Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
               <DropdownMenu.Content
                 align="end"
                 sideOffset={8}
-                className="z-50 flex min-w-40 flex-col gap-1 rounded-lg p-2 text-sm backdrop-blur-sm"
-                style={{
-                  background: 'var(--header-bg)',
-                  border: '1px solid var(--hairline-strong)',
-                }}
+                className="border-border bg-popover text-popover-foreground z-40 min-w-56 rounded-xl border p-2 shadow-[var(--overlay-shadow)] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
               >
-                {NAV.map((item) => (
-                  <DropdownMenu.Item key={item.to} asChild>
-                    <Link
-                      to={item.to}
-                      className="nav-link nav-link-mobile rounded-md px-3 py-2 outline-none"
-                      activeProps={{
-                        className:
-                          'nav-link nav-link-mobile is-active rounded-md px-3 py-2 outline-none',
-                      }}
-                      activeOptions={{ exact: item.to === '/' }}
-                    >
-                      {item.label}
-                    </Link>
-                  </DropdownMenu.Item>
-                ))}
+                <DropdownMenu.Group>
+                  <DropdownMenu.Label className="text-muted-foreground px-3 py-2 text-xs font-semibold">
+                    Image tools
+                  </DropdownMenu.Label>
+                  {PRIMARY_NAV.map(({ to, label, icon: Icon }) => (
+                    <DropdownMenu.Item key={to} asChild>
+                      <Link
+                        to={to}
+                        className="text-muted-foreground focus:bg-secondary focus:text-foreground flex h-11 items-center gap-3 rounded-md px-3 text-sm outline-none"
+                        activeProps={{
+                          className:
+                            'bg-brand-soft text-brand-ink flex h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold outline-none',
+                        }}
+                      >
+                        <Icon className="size-4" aria-hidden />
+                        {label}
+                      </Link>
+                    </DropdownMenu.Item>
+                  ))}
+                </DropdownMenu.Group>
+                <DropdownMenu.Separator className="bg-border my-2 h-px" />
+                <DropdownMenu.Group>
+                  {SECONDARY_NAV.map(({ to, label, icon: Icon }) => (
+                    <DropdownMenu.Item key={to} asChild>
+                      <Link
+                        to={to}
+                        className="text-muted-foreground focus:bg-secondary focus:text-foreground flex h-11 items-center gap-3 rounded-md px-3 text-sm outline-none"
+                        activeProps={{
+                          className:
+                            'bg-brand-soft text-brand-ink flex h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold outline-none',
+                        }}
+                      >
+                        <Icon className="size-4" aria-hidden />
+                        {label}
+                      </Link>
+                    </DropdownMenu.Item>
+                  ))}
+                </DropdownMenu.Group>
               </DropdownMenu.Content>
             </DropdownMenu.Portal>
           </DropdownMenu.Root>

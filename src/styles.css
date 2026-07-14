@@ -1,140 +1,95 @@
-/*
- * Comprimage design system — based on DESIGN.md (Resend editorial black).
- * Free substitute fonts: Fraunces (display serif), Inter (UI/body), Geist Mono (code).
- */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
-
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* --- DESIGN.md palette --- */
-  --canvas: #000000;
-  --surface-card: #0a0a0c;
-  --surface-elevated: #101012;
-  --surface-deep: #06060a;
+  color-scheme: light;
 
-  --hairline: rgba(255, 255, 255, 0.06);
-  --hairline-strong: rgba(255, 255, 255, 0.14);
-  --divider-soft: rgba(255, 255, 255, 0.04);
+  --canvas: oklch(1 0 0);
+  --surface: oklch(0.975 0.006 265);
+  --surface-raised: oklch(0.955 0.01 265);
+  --surface-subtle: oklch(0.988 0.003 265);
+  --ink: oklch(0.2 0.035 265);
+  --body: oklch(0.38 0.025 265);
+  --muted-ink: oklch(0.48 0.02 265);
+  --quiet-ink: oklch(0.57 0.018 265);
+  --line: oklch(0.89 0.012 265);
+  --line-strong: oklch(0.8 0.02 265);
+  --brand: oklch(0.57 0.22 275);
+  --brand-hover: oklch(0.51 0.23 275);
+  --brand-soft: oklch(0.95 0.035 275);
+  --brand-ink: oklch(0.36 0.18 275);
+  --success: oklch(0.5 0.16 150);
+  --success-soft: oklch(0.955 0.035 150);
+  --warning: oklch(0.54 0.14 70);
+  --warning-soft: oklch(0.96 0.04 80);
+  --danger: oklch(0.54 0.2 25);
+  --danger-soft: oklch(0.96 0.035 25);
+  --info: oklch(0.55 0.16 245);
+  --focus: oklch(0.64 0.2 275);
+  --header-bg: oklch(1 0 0 / 0.9);
+  --overlay-shadow: 0 8px 24px oklch(0.2 0.03 265 / 0.12);
+  --control-shadow: 0 1px 2px oklch(0.2 0.03 265 / 0.08);
 
-  /* Theme-adaptive chrome (overridden in .light). */
-  --header-bg: rgba(0, 0, 0, 0.72);
-  --feature-hover-border: rgba(255, 255, 255, 0.24);
-
-  --ink: #fcfdff;
-  --body: rgba(252, 253, 255, 0.86);
-  --charcoal: rgba(252, 253, 255, 0.7);
-  --mute: #a1a4a5;
-  --ash: #888e90;
-  --stone: #464a4d;
-
-  --primary-white: #fcfdff;
-  --primary-on: #000000;
-  --surface-light: #f1f7fe;
-
-  --accent-orange: #ff801f;
-  --accent-orange-glow: rgba(255, 89, 0, 0.22);
-  --accent-yellow: #ffc53d;
-  --accent-blue: #3b9eff;
-  --accent-blue-glow: rgba(0, 117, 255, 0.34);
-  --accent-green: #11ff99;
-  --accent-green-glow: rgba(34, 255, 153, 0.18);
-  --accent-red: #ff2047;
-  --accent-red-glow: rgba(255, 32, 71, 0.34);
-  --link: #3b9eff;
-
-  /* --- shadcn token mapping (the app ships dark; these are the defaults) --- */
   --background: var(--canvas);
   --foreground: var(--ink);
-  --card: var(--surface-card);
+  --card: var(--surface);
   --card-foreground: var(--ink);
-  --popover: var(--surface-elevated);
+  --popover: var(--canvas);
   --popover-foreground: var(--ink);
-  --primary: var(--primary-white);
-  --primary-foreground: var(--primary-on);
-  --secondary: var(--surface-elevated);
+  --primary: var(--brand);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: var(--surface-raised);
   --secondary-foreground: var(--ink);
-  --muted: var(--surface-elevated);
-  --muted-foreground: var(--mute);
-  --accent: var(--surface-elevated);
-  --accent-foreground: var(--ink);
-  --destructive: var(--accent-red);
-  --destructive-foreground: var(--ink);
-  --border: var(--hairline-strong);
-  --input: var(--hairline-strong);
-  --ring: var(--ink);
-
-  --radius: 0.5rem; /* 8px — buttons, inputs */
+  --muted: var(--surface);
+  --muted-foreground: var(--muted-ink);
+  --accent: var(--brand-soft);
+  --accent-foreground: var(--brand-ink);
+  --destructive: var(--danger);
+  --destructive-foreground: oklch(1 0 0);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--focus);
+  --radius: 0.5rem;
 }
 
-/* The design is single-register dark; keep .dark identical so shadcn's
-   dark: variants never fight the canvas. */
 .dark {
-  --background: var(--canvas);
-  --foreground: var(--ink);
-  --card: var(--surface-card);
-  --card-foreground: var(--ink);
-  --popover: var(--surface-elevated);
-  --popover-foreground: var(--ink);
-  --primary: var(--primary-white);
-  --primary-foreground: var(--primary-on);
-  --secondary: var(--surface-elevated);
-  --secondary-foreground: var(--ink);
-  --muted: var(--surface-elevated);
-  --muted-foreground: var(--mute);
-  --accent: var(--surface-elevated);
-  --accent-foreground: var(--ink);
-  --destructive: var(--accent-red);
-  --destructive-foreground: var(--ink);
-  --border: var(--hairline-strong);
-  --input: var(--hairline-strong);
-  --ring: var(--ink);
-}
-
-/* Light register. The shadcn semantic vars above are `var(--raw-token)`
-   references resolved per-element, so redefining only the raw DESIGN.md tokens
-   here re-tints the whole system. Elevation inverts (near-white canvas, light
-   grey surfaces), hairlines become translucent black, and the primary CTA flips
-   to a black pill with white text — mirroring the white-on-black signature. */
-.light {
-  --canvas: #ffffff;
-  --surface-card: #f6f6f8;
-  --surface-elevated: #efeff2;
-  --surface-deep: #eaeaee;
-
-  --hairline: rgba(0, 0, 0, 0.08);
-  --hairline-strong: rgba(0, 0, 0, 0.14);
-  --divider-soft: rgba(0, 0, 0, 0.05);
-
-  --header-bg: rgba(255, 255, 255, 0.78);
-  --feature-hover-border: rgba(0, 0, 0, 0.18);
-
-  --ink: #0a0a0c;
-  --body: rgba(10, 10, 12, 0.86);
-  --charcoal: rgba(10, 10, 12, 0.7);
-  --mute: #5c6063;
-  --ash: #6b7073;
-  --stone: #b9bdc0;
-
-  /* Flip the primary CTA: dark pill, light label. */
-  --primary-white: #0a0a0c;
-  --primary-on: #ffffff;
-
-  /* Slightly stronger link/accent for contrast on white. */
-  --accent-blue-glow: rgba(0, 117, 255, 0.16);
-  --accent-orange-glow: rgba(255, 89, 0, 0.14);
-  --accent-green-glow: rgba(34, 200, 120, 0.16);
-  --accent-red-glow: rgba(255, 32, 71, 0.14);
+  color-scheme: dark;
+  --canvas: oklch(0.17 0.025 265);
+  --surface: oklch(0.205 0.028 265);
+  --surface-raised: oklch(0.245 0.032 265);
+  --surface-subtle: oklch(0.19 0.026 265);
+  --ink: oklch(0.96 0.008 265);
+  --body: oklch(0.81 0.014 265);
+  --muted-ink: oklch(0.72 0.016 265);
+  --quiet-ink: oklch(0.63 0.018 265);
+  --line: oklch(0.31 0.028 265);
+  --line-strong: oklch(0.4 0.035 265);
+  --brand: oklch(0.68 0.19 275);
+  --brand-hover: oklch(0.73 0.17 275);
+  --brand-soft: oklch(0.27 0.07 275);
+  --brand-ink: oklch(0.86 0.08 275);
+  --success: oklch(0.72 0.16 150);
+  --success-soft: oklch(0.25 0.05 150);
+  --warning: oklch(0.76 0.14 80);
+  --warning-soft: oklch(0.27 0.05 80);
+  --danger: oklch(0.7 0.18 25);
+  --danger-soft: oklch(0.27 0.06 25);
+  --info: oklch(0.72 0.14 245);
+  --focus: oklch(0.72 0.18 275);
+  --header-bg: oklch(0.17 0.025 265 / 0.9);
+  --overlay-shadow: 0 8px 24px oklch(0.05 0.02 265 / 0.4);
+  --control-shadow: 0 1px 2px oklch(0.05 0.02 265 / 0.35);
 }
 
 @theme inline {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  --font-mono:
+    ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -155,28 +110,28 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-
-  /* semantic accents available as Tailwind colors */
-  --color-canvas: var(--canvas);
-  --color-surface-card: var(--surface-card);
-  --color-surface-elevated: var(--surface-elevated);
-  --color-surface-deep: var(--surface-deep);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-subtle: var(--surface-subtle);
   --color-ink: var(--ink);
   --color-body-text: var(--body);
-  --color-charcoal: var(--charcoal);
-  --color-mute: var(--mute);
-  --color-ash: var(--ash);
-  --color-accent-orange: var(--accent-orange);
-  --color-accent-yellow: var(--accent-yellow);
-  --color-accent-blue: var(--accent-blue);
-  --color-accent-green: var(--accent-green);
-  --color-accent-red: var(--accent-red);
-  --color-link: var(--link);
+  --color-muted-ink: var(--muted-ink);
+  --color-quiet-ink: var(--quiet-ink);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
 
-  --radius-sm: 0.375rem; /* 6px */
-  --radius-md: 0.5rem; /* 8px */
-  --radius-lg: 0.75rem; /* 12px */
-  --radius-xl: 1rem; /* 16px */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
 html,
@@ -185,186 +140,140 @@ body,
   min-height: 100%;
 }
 
+html {
+  background: var(--canvas);
+}
+
 body {
   margin: 0;
+  overflow-x: hidden;
+  background: var(--canvas);
   color: var(--ink);
-  background-color: var(--canvas);
   font-family: var(--font-sans);
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
 }
 
 a {
-  color: var(--link);
+  color: inherit;
   text-decoration: none;
 }
 
-/* --- Type utilities --- */
-.display-title {
-  font-family: var(--font-display);
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  font-feature-settings: 'ss01', 'liga';
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
-.kicker {
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--charcoal);
-}
-
-code,
-.mono {
-  font-family: var(--font-mono);
-}
-
-/* --- Surfaces (elevation via hairline borders, never drop shadows) --- */
-.hairline {
-  border: 1px solid var(--hairline);
-}
-.hairline-strong {
-  border: 1px solid var(--hairline-strong);
-}
-
-.surface-card {
-  background: var(--surface-card);
-  border: 1px solid var(--hairline-strong);
-  border-radius: var(--radius-lg);
-}
-
-.surface-elevated {
-  background: var(--surface-elevated);
-  border: 1px solid var(--hairline-strong);
-  border-radius: var(--radius-lg);
-}
-
-.code-window {
-  background: var(--surface-deep);
-  border: 1px solid var(--hairline-strong);
-  border-radius: var(--radius-lg);
-  color: var(--body);
-}
-
-.badge-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  background: var(--surface-elevated);
-  border: 1px solid var(--hairline);
-  color: var(--body);
-  border-radius: 9999px;
-  padding: 4px 10px;
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-
-/* Feature card: hairline surface, no drop shadow. Border warms on hover. */
-.feature-card {
-  background: var(--surface-card);
-  border: 1px solid var(--hairline-strong);
-  border-radius: var(--radius-lg);
-  transition:
-    border-color 180ms ease,
-    background-color 180ms ease,
-    transform 180ms ease;
-}
-.feature-card:hover {
-  border-color: var(--feature-hover-border);
-}
-
-/* --- Atmospheric glow: single low-opacity radial anchored at section top --- */
-.atmos-glow {
-  position: relative;
-  isolation: isolate;
-}
-.atmos-glow::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 600px;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(
-    620px 380px at 50% 0%,
-    var(--glow, var(--accent-blue-glow)),
-    transparent 70%
-  );
-}
-.atmos-glow-orange {
-  --glow: var(--accent-orange-glow);
-}
-.atmos-glow-green {
-  --glow: var(--accent-green-glow);
-}
-.atmos-glow-red {
-  --glow: var(--accent-red-glow);
-}
-
-/* --- Nav link underline --- */
-.nav-link {
-  position: relative;
-  color: var(--charcoal);
-  font-weight: 500;
-  transition: color 170ms ease;
-}
-.nav-link:hover,
-.nav-link.is-active {
+::selection {
+  background: var(--brand-soft);
   color: var(--ink);
-}
-.nav-link.is-active::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -21px;
-  height: 1px;
-  background: var(--ink);
-}
-
-/* Vertical dropdown variant (mobile menu): no underline, glow the active item. */
-.nav-link-mobile.is-active::after {
-  content: none;
-}
-.nav-link-mobile:hover {
-  background: var(--hairline);
-}
-.nav-link-mobile.is-active {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.rise-in {
-  animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Inline / block code inside prose */
-code:not(pre code) {
-  font-size: 0.9em;
-  border: 1px solid var(--hairline-strong);
-  background: var(--surface-card);
-  border-radius: var(--radius-xs, 4px);
-  padding: 2px 6px;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+.page-title {
+  max-width: 22ch;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.page-description {
+  max-width: 68ch;
+  color: var(--body);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.section-title {
+  color: var(--ink);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.ui-label {
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.surface {
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.surface-subtle {
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface-subtle);
+}
+
+.status-success {
+  color: var(--success);
+}
+
+.status-danger {
+  color: var(--danger);
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--surface-raised) 45%,
+    var(--surface) 65%
+  );
+  background-size: 240% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

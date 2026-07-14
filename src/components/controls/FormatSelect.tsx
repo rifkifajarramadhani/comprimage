@@ -5,6 +5,7 @@ import { Label } from '#/components/ui/label.tsx'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -31,11 +32,13 @@ export function FormatSelect({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {options.map((f) => (
-            <SelectItem key={f.format} value={f.format}>
-              {f.label}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            {options.map((f) => (
+              <SelectItem key={f.format} value={f.format}>
+                {f.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </Select>
     </div>

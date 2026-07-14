@@ -21,9 +21,8 @@ function CompressPage() {
 
   return (
     <ToolWorkspace
-      eyebrow="Compress"
       title="Compress images"
-      description="Shrink file size at the same dimensions. Drag the quality slider and watch the savings update live."
+      description="Reduce file size at the same dimensions and see the result update as you tune quality."
       options={options}
       controls={
         <div className="grid gap-5">

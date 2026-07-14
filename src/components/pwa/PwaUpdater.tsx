@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { RefreshCw } from 'lucide-react'
 import { Button } from '#/components/ui/button.tsx'
 
 /**
@@ -82,10 +83,10 @@ export function PwaUpdater() {
   return (
     <div
       role="status"
-      className="surface-elevated fixed right-4 bottom-4 z-50 flex items-center gap-4 rounded-lg px-4 py-3"
-      style={{ border: '1px solid var(--hairline-strong)' }}
+      className="border-border bg-popover text-popover-foreground fixed right-4 bottom-4 z-[60] flex max-w-[calc(100vw-2rem)] items-center gap-4 rounded-xl border px-4 py-3 shadow-[var(--overlay-shadow)]"
     >
-      <span className="text-body text-sm">A new version is available.</span>
+      <RefreshCw className="text-brand size-4 shrink-0" aria-hidden />
+      <span className="text-sm">A new version is ready.</span>
       <Button size="sm" onClick={reload}>
         Reload
       </Button>

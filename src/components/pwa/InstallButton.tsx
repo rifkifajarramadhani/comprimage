@@ -42,7 +42,7 @@ export function InstallButton() {
 
   return (
     <Button variant="outline" size="sm" onClick={install}>
-      <Download />
+      <Download data-icon="inline-start" />
       Install
     </Button>
   )

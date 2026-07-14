@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { ImageUp, Loader2 } from 'lucide-react'
+import { FolderOpen, ImageUp, Loader2, ShieldCheck } from 'lucide-react'
 import type { SourceImage } from '#/types/image.ts'
 import {
   ACCEPTED_TYPES,
@@ -59,46 +59,72 @@ export function Dropzone({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    onDropRejected: (rejections) => {
+      const tooLarge = rejections.some((rejection) =>
+        rejection.errors.some(
+          (candidate) => candidate.code === 'file-too-large',
+        ),
+      )
+      setError(
+        tooLarge
+          ? multiple
+            ? 'Some files were larger than 50 MB and skipped.'
+            : 'That file is larger than 50 MB.'
+          : multiple
+            ? 'Some files are not supported and were skipped.'
+            : 'That file type is not supported. Choose JPG, PNG, WebP, AVIF, or GIF.',
+      )
+    },
     accept: Object.fromEntries(ACCEPTED_TYPES.map((t) => [t, []])),
+    maxSize: MAX_FILE_BYTES,
     multiple,
   })
 
   return (
-    <div>
+    <div className={cn('flex flex-col gap-3', className)}>
       <div
         {...getRootProps()}
+        aria-busy={busy}
         className={cn(
-          'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl px-6 py-14 text-center transition-colors',
-          isDragActive ? 'bg-surface-elevated' : 'bg-surface-card',
-          className,
+          'group flex min-h-60 cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border border-dashed px-6 py-10 text-center transition-[background-color,border-color,box-shadow] duration-200 outline-none focus-within:ring-[3px] focus-within:ring-ring/30',
+          isDragActive
+            ? 'border-primary bg-brand-soft'
+            : 'border-input bg-surface-subtle hover:border-primary hover:bg-surface',
         )}
-        style={{
-          border: `1px dashed ${
-            isDragActive ? 'rgba(255,255,255,0.4)' : 'var(--hairline-strong)'
-          }`,
-        }}
       >
         <input {...getInputProps()} aria-label="Upload image" />
-        {busy ? (
-          <Loader2 className="text-mute size-7 animate-spin" />
-        ) : (
-          <ImageUp className="text-mute size-7" />
-        )}
-        <div>
-          <p className="text-ink font-medium">
+        <span className="bg-brand-soft text-brand flex size-12 items-center justify-center rounded-lg">
+          {busy ? (
+            <Loader2 className="size-6 animate-spin" aria-hidden />
+          ) : (
+            <ImageUp className="size-6" aria-hidden />
+          )}
+        </span>
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-foreground text-base font-semibold">
             {isDragActive
-              ? 'Drop it here'
+              ? 'Drop images here'
               : multiple
-                ? 'Drop images, or click to browse'
-                : 'Drop an image, or click to browse'}
+                ? 'Drop images here'
+                : 'Drop an image here'}
           </p>
-          <p className="text-ash mt-1 text-sm">
-            JPG, PNG, WebP, AVIF or GIF · processed on your device
+          {!isDragActive && (
+            <span className="bg-primary text-primary-foreground group-hover:bg-[var(--brand-hover)] inline-flex h-10 items-center gap-2 rounded-md px-4 text-sm font-semibold shadow-[var(--control-shadow)] transition-colors">
+              <FolderOpen className="size-4" aria-hidden />
+              Browse files
+            </span>
+          )}
+          <p className="text-muted-foreground text-sm">
+            JPG, PNG, WebP, AVIF or GIF · up to 50 MB
           </p>
         </div>
+        <p className="text-muted-foreground flex items-center gap-2 text-xs">
+          <ShieldCheck className="text-success size-4" aria-hidden />
+          Processed on your device
+        </p>
       </div>
       {error && (
-        <p className="mt-3 text-sm" style={{ color: 'var(--accent-red)' }}>
+        <p role="alert" className="text-danger text-sm">
           {error}
         </p>
       )}

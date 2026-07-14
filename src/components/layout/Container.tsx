@@ -1,6 +1,6 @@
 import { cn } from '#/lib/utils.ts'
 
-/** Max-width page wrap (~1200px) per DESIGN.md body sections. */
+/** Shared responsive page wrap. */
 export function Container({
   className,
   children,
@@ -9,7 +9,12 @@ export function Container({
   children: React.ReactNode
 }) {
   return (
-    <div className={cn('mx-auto w-full max-w-[1200px] px-6', className)}>
+    <div
+      className={cn(
+        'mx-auto w-full max-w-[1248px] px-5 sm:px-6 lg:px-8',
+        className,
+      )}
+    >
       {children}
     </div>
   )

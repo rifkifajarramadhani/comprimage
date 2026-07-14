@@ -5,6 +5,7 @@ import { Switch } from '#/components/ui/switch.tsx'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -25,7 +26,8 @@ export function ResizeControls({
   onChange: (next: ResizeOptions) => void
 }) {
   const mode = MODES.find((m) => m.value === options.mode) ?? MODES[0]
-  const aspectLocked = options.mode === 'percentage' || options.mode === 'longest-edge'
+  const aspectLocked =
+    options.mode === 'percentage' || options.mode === 'longest-edge'
 
   return (
     <div className="grid gap-5">
@@ -39,11 +41,13 @@ export function ResizeControls({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {MODES.map((m) => (
-              <SelectItem key={m.value} value={m.value}>
-                {m.label}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              {MODES.map((m) => (
+                <SelectItem key={m.value} value={m.value}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>
@@ -64,13 +68,14 @@ export function ResizeControls({
       </div>
 
       {(options.mode === 'width' || options.mode === 'height') && (
-        <label className="flex items-center justify-between">
-          <span className="text-sm font-medium">Keep aspect ratio</span>
+        <label className="flex min-h-11 items-center justify-between gap-4">
+          <span className="text-sm font-semibold">Keep aspect ratio</span>
           <Switch
             checked={options.keepAspectRatio}
             onCheckedChange={(checked) =>
               onChange({ ...options, keepAspectRatio: checked })
             }
+            aria-label="Keep aspect ratio"
           />
         </label>
       )}
@@ -97,16 +102,19 @@ export function ResizeControls({
         )}
 
       {aspectLocked && (
-        <p className="text-ash text-sm">Aspect ratio is preserved.</p>
+        <p className="text-muted-foreground text-sm">
+          Aspect ratio is preserved.
+        </p>
       )}
 
-      <label className="flex items-center justify-between">
-        <span className="text-sm font-medium">Prevent upscaling</span>
+      <label className="flex min-h-11 items-center justify-between gap-4">
+        <span className="text-sm font-semibold">Prevent upscaling</span>
         <Switch
           checked={options.preventUpscaling}
           onCheckedChange={(checked) =>
             onChange({ ...options, preventUpscaling: checked })
           }
+          aria-label="Prevent upscaling"
         />
       </label>
     </div>
