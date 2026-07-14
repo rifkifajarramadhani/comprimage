@@ -1,13 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
-import {
-  CheckCircle2,
-  Images,
-  Layers3,
-  Loader2,
-  Package,
-  TriangleAlert,
-} from 'lucide-react'
+import CheckCircle2 from 'lucide-react/dist/esm/icons/circle-check'
+import Images from 'lucide-react/dist/esm/icons/images'
+import Layers3 from 'lucide-react/dist/esm/icons/layers-3'
+import Loader2 from 'lucide-react/dist/esm/icons/loader-circle'
+import Package from 'lucide-react/dist/esm/icons/package'
+import TriangleAlert from 'lucide-react/dist/esm/icons/triangle-alert'
 import type { EncodeOptions } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
 import { compressionStats } from '#/lib/compress.ts'
@@ -26,8 +24,18 @@ import { BatchList } from '#/components/batch/BatchList.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
 import { CompressControls } from '#/components/controls/CompressControls.tsx'
 import { Button } from '#/components/ui/button.tsx'
+import { createSeoHead } from '#/lib/seo.ts'
 
-export const Route = createFileRoute('/batch')({ component: BatchPage })
+export const Route = createFileRoute('/batch')({
+  component: BatchPage,
+  head: () =>
+    createSeoHead({
+      path: '/batch',
+      title: 'Batch Compress and Convert Images | Comprimage',
+      description:
+        'Compress or convert multiple images with one set of options, then download a ZIP. Every file is processed locally in your browser.',
+    }),
+})
 
 function BatchPage() {
   const settings = useSettingsStore.getState()

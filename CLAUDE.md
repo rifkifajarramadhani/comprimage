@@ -45,6 +45,6 @@ Run a single test: `bunx vitest run src/lib/resize.test.ts` (or `bunx vitest -t 
 
 ## Build & deploy specifics
 
-- The **service worker is generated post-build** by `scripts/generate-sw.mjs` (Workbox `generateSW`), *not* vite-plugin-pwa — the plugin is skipped under TanStack Start's multi-environment build. Update behavior is prompt-to-update: a new SW waits for the user to click Reload (posts `SKIP_WAITING`, handled by `public/sw-message.js`).
-- `vite.config.ts` uses `spa: { enabled: true }` (static shell, `_shell.html` fallback) and pins the prerender preview server to `127.0.0.1` (avoids IPv4/IPv6 mismatch during prerender in containers).
+- The **service worker is generated post-build** by `scripts/generate-sw.mjs` (Workbox `generateSW`), not vite-plugin-pwa — the plugin is skipped under TanStack Start's multi-environment build. Update behavior is prompt-to-update: a new SW waits for the user to click Reload (posts `SKIP_WAITING`, handled by `public/sw-message.js`).
+- `vite.config.ts` explicitly prerenders every application route, generates the sitemap, and pins the prerender preview server to `127.0.0.1` (avoids IPv4/IPv6 mismatch during prerender in containers). `scripts/verify-seo.mjs` validates the emitted route metadata and initial bundle budget.
 - Two-stage Docker: `oven/bun` build → `nginx` serving `dist/client`. The image uses Bun because `oven/bun` has no `node` binary. Served behind a shared Traefik edge proxy (no host ports). CI (`.github/workflows/deploy.yml`) builds on push to `main`, pushes to GHCR, and SSH-deploys.

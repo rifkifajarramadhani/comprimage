@@ -1,4 +1,4 @@
-import { Download } from 'lucide-react'
+import Download from 'lucide-react/dist/esm/icons/download'
 import type { ProcessResult, SourceImage } from '#/types/image.ts'
 import { Button } from '#/components/ui/button.tsx'
 import { downloadBlob } from '#/lib/download.ts'

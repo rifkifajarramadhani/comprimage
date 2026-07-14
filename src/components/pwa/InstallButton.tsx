@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Download } from 'lucide-react'
+import Download from 'lucide-react/dist/esm/icons/download'
 import { Button } from '#/components/ui/button.tsx'
 
 /** The non-standard beforeinstallprompt event (not in lib.dom yet). */

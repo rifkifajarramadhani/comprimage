@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { ShieldCheck } from 'lucide-react'
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check'
 import { Container } from './Container.tsx'
 
 export function SiteFooter() {

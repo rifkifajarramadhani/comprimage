@@ -1,6 +1,9 @@
 import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { FolderOpen, ImageUp, Loader2, ShieldCheck } from 'lucide-react'
+import FolderOpen from 'lucide-react/dist/esm/icons/folder-open'
+import ImageUp from 'lucide-react/dist/esm/icons/image-up'
+import Loader2 from 'lucide-react/dist/esm/icons/loader-circle'
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check'
 import type { SourceImage } from '#/types/image.ts'
 import {
   ACCEPTED_TYPES,

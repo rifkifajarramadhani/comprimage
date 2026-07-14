@@ -15,7 +15,7 @@ Live at **https://comprimage.rifkiramadhani.my.id**
 
 ## Tech stack
 
-- [TanStack Start](https://tanstack.com/start) (SPA/static mode), [TanStack Router](https://tanstack.com/router), React 19
+- [TanStack Start](https://tanstack.com/start) (static prerendering), [TanStack Router](https://tanstack.com/router), React 19
 - Tailwind CSS 4, [shadcn/ui](https://ui.shadcn.com/) (Radix)
 - Zustand for image and settings state
 - Web Workers + Canvas API for image processing
@@ -26,9 +26,9 @@ Live at **https://comprimage.rifkiramadhani.my.id**
 
 ```
 comprimage/
-├── docker/nginx/          # nginx SPA config
-├── public/                # PWA manifest, robots, SW message handler
-├── scripts/               # post-build Workbox SW generation
+├── docker/nginx/          # nginx prerendered-route config
+├── public/                # PWA, social, robots, and error assets
+├── scripts/               # Workbox generation and SEO verification
 ├── src/
 │   ├── components/        # UI by domain (upload, preview, controls, batch, pwa, layout, ui)
 │   ├── hooks/             # useImageProcessor, useImageQueue
@@ -44,14 +44,15 @@ comprimage/
 
 ### Routes
 
-| Path        | Purpose                                      |
-| ----------- | -------------------------------------------- |
-| `/`         | Home — dropzone and tool overview            |
-| `/resize`   | Scale images with live before/after preview  |
-| `/compress` | Shrink file size at the same dimensions      |
-| `/convert`  | Change output format                         |
-| `/batch`    | Process multiple images, download as ZIP     |
-| `/settings` | Theme, defaults, and worker concurrency      |
+| Path        | Purpose                                     |
+| ----------- | ------------------------------------------- |
+| `/`         | Home — dropzone and tool overview           |
+| `/resize`   | Scale images with live before/after preview |
+| `/compress` | Shrink file size at the same dimensions     |
+| `/convert`  | Change output format                        |
+| `/batch`    | Process multiple images, download as ZIP    |
+| `/about`    | Local processing and codec details          |
+| `/settings` | Theme, defaults, and worker concurrency     |
 
 ## How it works
 
@@ -85,16 +86,16 @@ bun run format
 bun run check
 ```
 
-`build` runs `vite build` then `bun scripts/generate-sw.mjs` to emit the service worker. The Docker image uses Bun for the same reason — the `oven/bun` image has no `node` binary.
+`build` prerenders every route, emits the Workbox service worker, and verifies the generated SEO metadata, sitemap, social image, and initial bundle size. The Docker image uses Bun because the `oven/bun` image has no `node` binary.
 
 ## Deployment (Docker)
 
-Comprimage is a **100% client-side static SPA** (no backend, no database). It ships as a two-stage container: a **Bun** build stage produces the static output (`dist/client`), and an **nginx** stage serves it.
+Comprimage is a **100% client-side application with prerendered static HTML** (no backend, no database). It ships as a two-stage container: a **Bun** build stage produces the static output (`dist/client`), and an **nginx** stage serves it.
 
 Files:
 
 - `Dockerfile` — `oven/bun:1` build stage (`bun install --frozen-lockfile` + `bun run build`) → `nginx:1.27-alpine` serving `dist/client`
-- `docker/nginx/comprimage.conf` — SPA fallback to the prerendered `_shell.html`, `no-cache` headers for `sw.js` / `manifest.json`, and long-lived caching for hashed `/assets`
+- `docker/nginx/comprimage.conf` — clean prerendered route serving, real document/asset 404s, `no-cache` headers for `sw.js` / `manifest.json`, and long-lived caching for hashed `/assets`
 - `docker-compose.yml` — a single `web` service on the external `edge` network
 
 Build and run:

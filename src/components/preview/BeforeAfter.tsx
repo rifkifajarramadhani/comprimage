@@ -1,4 +1,5 @@
-import { ImageIcon, Loader2 } from 'lucide-react'
+import ImageIcon from 'lucide-react/dist/esm/icons/image'
+import Loader2 from 'lucide-react/dist/esm/icons/loader-circle'
 import type { ProcessResult, SourceImage } from '#/types/image.ts'
 import { formatMeta } from '#/lib/convert.ts'
 import { formatBytes } from '#/lib/format.ts'

@@ -24,8 +24,10 @@ const { count, size, warnings } = await generateSW({
   cleanupOutdatedCaches: true,
   // Route/worker chunks can exceed the 2 MiB default.
   maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-  // SPA: serve the prerendered shell for uncached navigations.
-  navigateFallback: '/_shell.html',
+  // Offline navigations hydrate from the home document, then TanStack Router
+  // resolves the requested client-side URL. Online requests use route-specific
+  // prerendered HTML served by nginx.
+  navigateFallback: '/index.html',
   runtimeCaching: [
     {
       // Google Fonts stylesheet + font files, so type still renders offline.

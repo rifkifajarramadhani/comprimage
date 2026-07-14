@@ -2,13 +2,13 @@ import {
   HeadContent,
   Link,
   Scripts,
-  createRootRouteWithContext,
+  createRootRoute,
 } from '@tanstack/react-router'
-import { ArrowLeft, ImageOff } from 'lucide-react'
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left'
+import ImageOff from 'lucide-react/dist/esm/icons/image-off'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { Container } from '../components/layout/Container.tsx'
 import { SiteHeader } from '../components/layout/SiteHeader.tsx'
 import { SiteFooter } from '../components/layout/SiteFooter.tsx'
@@ -17,13 +17,7 @@ import { PwaUpdater } from '../components/pwa/PwaUpdater.tsx'
 
 import appCss from '../styles.css?url'
 
-import type { QueryClient } from '@tanstack/react-query'
-
-interface MyRouterContext {
-  queryClient: QueryClient
-}
-
-export const Route = createRootRouteWithContext<MyRouterContext>()({
+export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -104,7 +98,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 name: 'Tanstack Router',
                 render: <TanStackRouterDevtoolsPanel />,
               },
-              TanStackQueryDevtools,
             ]}
           />
         )}

@@ -152,7 +152,9 @@ export function useImageQueue(options: ProcessOptions): QueueApi {
     }
   }, [])
 
-  const api = useMemo<Omit<QueueApi, 'items' | 'doneCount' | 'errorCount' | 'isProcessing'>>(
+  const api = useMemo<
+    Omit<QueueApi, 'items' | 'doneCount' | 'errorCount' | 'isProcessing'>
+  >(
     () => ({
       addSources: (images) =>
         setSources((prev) => {

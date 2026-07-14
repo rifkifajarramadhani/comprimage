@@ -1,11 +1,9 @@
 import type { ProcessResult, SourceImage } from '#/types/image.ts'
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  FileOutput,
-  Maximize2,
-  ScanSearch,
-} from 'lucide-react'
+import ArrowDownRight from 'lucide-react/dist/esm/icons/arrow-down-right'
+import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right'
+import FileOutput from 'lucide-react/dist/esm/icons/file-output'
+import Maximize2 from 'lucide-react/dist/esm/icons/maximize-2'
+import ScanSearch from 'lucide-react/dist/esm/icons/scan-search'
 import { compressionStats, qualityPercent } from '#/lib/compress.ts'
 import { formatMeta } from '#/lib/convert.ts'
 import { formatBytes } from '#/lib/format.ts'

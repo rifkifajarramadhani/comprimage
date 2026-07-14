@@ -1,24 +1,43 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import {
-  ArrowRight,
-  CheckCircle2,
-  Cpu,
-  Download,
-  Eye,
-  FileDown,
-  FolderOpen,
-  ImageIcon,
-  Layers3,
-  Maximize2,
-  Repeat2,
-  ShieldCheck,
-  Sparkles,
-} from 'lucide-react'
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right'
+import CheckCircle2 from 'lucide-react/dist/esm/icons/circle-check'
+import Cpu from 'lucide-react/dist/esm/icons/cpu'
+import Download from 'lucide-react/dist/esm/icons/download'
+import Eye from 'lucide-react/dist/esm/icons/eye'
+import FileDown from 'lucide-react/dist/esm/icons/file-down'
+import FolderOpen from 'lucide-react/dist/esm/icons/folder-open'
+import ImageIcon from 'lucide-react/dist/esm/icons/image'
+import Layers3 from 'lucide-react/dist/esm/icons/layers-3'
+import Maximize2 from 'lucide-react/dist/esm/icons/maximize-2'
+import Repeat2 from 'lucide-react/dist/esm/icons/repeat-2'
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check'
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles'
 import { Container } from '#/components/layout/Container.tsx'
 import { Dropzone } from '#/components/upload/Dropzone.tsx'
 import { useImageStore } from '#/stores/image-store.ts'
+import { createSeoHead, WEBSITE_JSON_LD } from '#/lib/seo.ts'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  component: Home,
+  head: () => {
+    const seo = createSeoHead({
+      path: '/',
+      title: 'Image Compressor, Resizer & Converter | Comprimage',
+      description:
+        'Compress, resize, and convert JPG, PNG, WebP, AVIF, and JPEG XL images privately in your browser. No uploads, with fast local processing.',
+    })
+
+    return {
+      ...seo,
+      scripts: [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(WEBSITE_JSON_LD),
+        },
+      ],
+    }
+  },
+})
 
 const TOOLS = [
   {

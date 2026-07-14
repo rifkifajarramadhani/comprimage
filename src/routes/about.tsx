@@ -1,31 +1,24 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import {
-  ArrowRight,
-  Cpu,
-  Eye,
-  FileImage,
-  LockKeyhole,
-  ScanSearch,
-  ShieldCheck,
-} from 'lucide-react'
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right'
+import Cpu from 'lucide-react/dist/esm/icons/cpu'
+import Eye from 'lucide-react/dist/esm/icons/eye'
+import FileImage from 'lucide-react/dist/esm/icons/file-image'
+import LockKeyhole from 'lucide-react/dist/esm/icons/lock-keyhole'
+import ScanSearch from 'lucide-react/dist/esm/icons/scan-search'
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check'
 import { Container } from '#/components/layout/Container.tsx'
 import { PageIntro } from '#/components/layout/PageIntro.tsx'
+import { createSeoHead } from '#/lib/seo.ts'
 
 export const Route = createFileRoute('/about')({
   component: AboutPage,
-  head: () => ({
-    meta: [
-      {
-        title:
-          'How Comprimage works — strong compression, minimal quality loss',
-      },
-      {
-        name: 'description',
-        content:
-          'Comprimage uses modern WASM image codecs, progressive resizing, and perceptual target quality to shrink images locally in your browser.',
-      },
-    ],
-  }),
+  head: () =>
+    createSeoHead({
+      path: '/about',
+      title: 'How Comprimage Processes Images Privately | Comprimage',
+      description:
+        'Learn how Comprimage uses modern codecs, progressive resizing, and perceptual quality checks to process images locally in your browser.',
+    }),
 })
 
 const PIPELINE = [

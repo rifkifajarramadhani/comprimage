@@ -6,8 +6,18 @@ import { useSettingsStore } from '#/stores/settings-store.ts'
 import { ToolWorkspace } from '#/components/ToolWorkspace.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
 import { CompressControls } from '#/components/controls/CompressControls.tsx'
+import { createSeoHead } from '#/lib/seo.ts'
 
-export const Route = createFileRoute('/convert')({ component: ConvertPage })
+export const Route = createFileRoute('/convert')({
+  component: ConvertPage,
+  head: () =>
+    createSeoHead({
+      path: '/convert',
+      title: 'Convert Image Formats Privately | Comprimage',
+      description:
+        'Convert images between JPG, PNG, WebP, AVIF, and JPEG XL with local WebAssembly codecs. Your files are never uploaded.',
+    }),
+})
 
 function ConvertPage() {
   const settings = useSettingsStore.getState()

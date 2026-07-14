@@ -6,8 +6,18 @@ import { useSettingsStore } from '#/stores/settings-store.ts'
 import { ToolWorkspace } from '#/components/ToolWorkspace.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
 import { CompressControls } from '#/components/controls/CompressControls.tsx'
+import { createSeoHead } from '#/lib/seo.ts'
 
-export const Route = createFileRoute('/compress')({ component: CompressPage })
+export const Route = createFileRoute('/compress')({
+  component: CompressPage,
+  head: () =>
+    createSeoHead({
+      path: '/compress',
+      title: 'Compress Images Online Privately | Comprimage',
+      description:
+        'Reduce image file size with modern JPEG, WebP, AVIF, PNG, and JPEG XL codecs. Preview quality before saving; nothing is uploaded.',
+    }),
+})
 
 function CompressPage() {
   const settings = useSettingsStore.getState()

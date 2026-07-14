@@ -1,4 +1,4 @@
-import { LockKeyhole } from 'lucide-react'
+import LockKeyhole from 'lucide-react/dist/esm/icons/lock-keyhole'
 import { cn } from '#/lib/utils.ts'
 
 export function PrivacyNote({

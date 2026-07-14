@@ -33,10 +33,30 @@ const config = defineConfig({
   plugins: [
     devtools(),
     tailwindcss(),
-    // SPA / static mode: emit a static SPA shell so the app deploys to any
-    // static host (GitHub Pages, Cloudflare, Netlify) with no backend. All
-    // image processing runs client-side, so there is nothing to render server-side.
-    tanstackStart({ spa: { enabled: true } }),
+    // Emit deterministic HTML for every public route. Navigation remains
+    // client-side after hydration, while crawlers and link preview bots receive
+    // complete page content and metadata without executing JavaScript.
+    tanstackStart({
+      prerender: {
+        enabled: true,
+        autoStaticPathsDiscovery: false,
+        crawlLinks: false,
+        failOnError: true,
+      },
+      pages: [
+        { path: '/' },
+        { path: '/resize' },
+        { path: '/compress' },
+        { path: '/convert' },
+        { path: '/batch' },
+        { path: '/about' },
+        { path: '/settings', sitemap: { exclude: true } },
+      ],
+      sitemap: {
+        enabled: true,
+        host: 'https://comprimage.rifkiramadhani.my.id',
+      },
+    }),
     viteReact(),
   ],
 })

@@ -1,4 +1,6 @@
-import { FileImage, RotateCcw, TriangleAlert } from 'lucide-react'
+import FileImage from 'lucide-react/dist/esm/icons/file-image'
+import RotateCcw from 'lucide-react/dist/esm/icons/rotate-ccw'
+import TriangleAlert from 'lucide-react/dist/esm/icons/triangle-alert'
 import type { ProcessOptions } from '#/lib/process.ts'
 import { useImageProcessor } from '#/hooks/use-image-processor.ts'
 import { useImageStore } from '#/stores/image-store.ts'

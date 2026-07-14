@@ -5,14 +5,14 @@ services:
       context: .
       target: prod
     expose:
-      - "80"
+      - '80'
     networks:
       # Public edge network: the shared Traefik proxy routes external traffic here.
       - edge
     labels:
       - traefik.enable=true
       - traefik.docker.network=edge
-      - "traefik.http.routers.comprimage.rule=Host(`comprimage.rifkiramadhani.my.id`)"
+      - 'traefik.http.routers.comprimage.rule=Host(`comprimage.rifkiramadhani.my.id`)'
       - traefik.http.routers.comprimage.entrypoints=websecure
       - traefik.http.routers.comprimage.tls=true
       - traefik.http.routers.comprimage.tls.certresolver=letsencrypt
@@ -22,7 +22,7 @@ services:
       - traefik.http.middlewares.comprimage-ratelimit.ratelimit.burst=200
       - traefik.http.routers.comprimage.middlewares=comprimage-ratelimit
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1/healthz']
       interval: 10s
       timeout: 3s
       start_period: 10s

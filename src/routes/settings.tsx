@@ -1,5 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Check, Monitor, Moon, RotateCcw, Sun } from 'lucide-react'
+import Check from 'lucide-react/dist/esm/icons/check'
+import Monitor from 'lucide-react/dist/esm/icons/monitor'
+import Moon from 'lucide-react/dist/esm/icons/moon'
+import RotateCcw from 'lucide-react/dist/esm/icons/rotate-ccw'
+import Sun from 'lucide-react/dist/esm/icons/sun'
 import type { ThemePreference } from '#/lib/settings.ts'
 import { maxConcurrency } from '#/lib/settings.ts'
 import { useSettingsStore } from '#/stores/settings-store.ts'
@@ -12,8 +16,19 @@ import { Label } from '#/components/ui/label.tsx'
 import { Slider } from '#/components/ui/slider.tsx'
 import { Switch } from '#/components/ui/switch.tsx'
 import { cn } from '#/lib/utils.ts'
+import { createSeoHead } from '#/lib/seo.ts'
 
-export const Route = createFileRoute('/settings')({ component: SettingsPage })
+export const Route = createFileRoute('/settings')({
+  component: SettingsPage,
+  head: () =>
+    createSeoHead({
+      path: '/settings',
+      title: 'Settings | Comprimage',
+      description:
+        'Manage Comprimage’s theme, processing concurrency, output format, quality, and resize defaults on this device.',
+      noIndex: true,
+    }),
+})
 
 const THEME_OPTIONS: Array<{
   value: ThemePreference
