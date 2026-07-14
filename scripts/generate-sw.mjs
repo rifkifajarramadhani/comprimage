@@ -24,13 +24,12 @@ const { count, size, warnings } = await generateSW({
     'icons/**',
   ],
   swDest,
-  // Prompt-to-update: a new build waits until the user clicks Reload (which
-  // posts SKIP_WAITING, handled by the imported sw-message.js), rather than
-  // auto-reloading and dropping in-progress work. clientsClaim lets the newly
-  // activated worker take control so the page reloads once on confirmation.
+  // Fully automatic updates: a new build activates immediately (skipWaiting)
+  // and takes control of every open tab (clientsClaim), even mid-task — see
+  // src/components/pwa/PwaUpdater.tsx, which listens for the resulting
+  // controllerchange and reloads the page.
   clientsClaim: true,
-  skipWaiting: false,
-  importScripts: ['/sw-message.js'],
+  skipWaiting: true,
   cleanupOutdatedCaches: true,
   // Route/worker chunks can exceed the 2 MiB default.
   maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
