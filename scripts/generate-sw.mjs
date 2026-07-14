@@ -13,6 +13,16 @@ const swDest = resolve(root, 'dist/client/sw.js')
 const { count, size, warnings } = await generateSW({
   globDirectory: resolve(root, 'dist/client'),
   globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json}'],
+  // Stable browser/PWA metadata URLs are revalidated through nginx instead of
+  // being trapped behind the active worker's precache. Application documents
+  // and content-hashed build assets remain available offline.
+  globIgnores: [
+    'manifest.json',
+    'favicon.ico',
+    'apple-touch-icon.png',
+    'comprimage-mark.svg',
+    'icons/**',
+  ],
   swDest,
   // Prompt-to-update: a new build waits until the user clicks Reload (which
   // posts SKIP_WAITING, handled by the imported sw-message.js), rather than

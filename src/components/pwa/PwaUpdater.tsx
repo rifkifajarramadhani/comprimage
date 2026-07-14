@@ -45,6 +45,12 @@ export function PwaUpdater() {
             }
           })
         })
+
+        // Registration checks can be throttled by the browser. Explicitly ask
+        // for a fresh sw.js so every visit can surface a waiting deployment.
+        void reg.update().catch(() => {
+          // Stay on the current version when the update check is offline/fails.
+        })
       })
       .catch(() => {
         // No SW in dev or when unsupported — the app still works online.
