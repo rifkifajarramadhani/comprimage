@@ -94,18 +94,24 @@ Comprimage is a **100% client-side application with prerendered static HTML** (n
 
 Files:
 
-- `Dockerfile` — `oven/bun:1` build stage (`bun install --frozen-lockfile` + `bun run build`) → `nginx:1.27-alpine` serving `dist/client`
+- `Dockerfile` — shared `dependencies` stage (`bun install --frozen-lockfile`) fanning out to a `development` stage (Vite dev server) and a `build` → `production` stage (`bun run build` → `nginx:1.27-alpine` serving `dist/client`)
 - `docker/nginx/comprimage.conf` — clean prerendered route serving, real document/asset 404s, `no-cache` headers for `sw.js` / `manifest.json`, and long-lived caching for hashed `/assets`
-- `docker-compose.yml` — a single `web` service on the external `edge` network
+- `docker-compose.yml` — two Compose profiles: `web-dev` (`--profile dev`) and `web-prod` (`--profile prod`, on the external `edge` network)
+- `.env.example` — copy to `.env` to override `FRONTEND_DEV_PORT` (dev host port) and `IMAGE_TAG` (prod image)
 
-Build and run:
+Local development (hot-reloading Vite dev server on `http://localhost:3000`, source bind-mounted):
 
 ```bash
-docker compose build
-docker compose up -d
+docker compose --profile dev up --build
 ```
 
-TLS and routing are handled by the shared **Traefik** edge proxy (Let's Encrypt). The container joins the `edge` Docker network and publishes **no** host ports; routing is configured via Traefik labels on the `web` service in `docker-compose.yml`.
+Production:
+
+```bash
+docker compose --profile prod up -d --build
+```
+
+TLS and routing are handled by the shared **Traefik** edge proxy (Let's Encrypt). The `web-prod` container joins the `edge` Docker network and publishes **no** host ports; routing is configured via Traefik labels on the `web-prod` service in `docker-compose.yml`.
 
 > `vite.config.ts` pins the prerender preview server to `127.0.0.1` so the build's prerender step is reliable inside containers.
 

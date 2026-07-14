@@ -25,7 +25,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          target: prod
+          target: production
           push: true
           tags: |
             ghcr.io/rifkifajarramadhani/comprimage:latest

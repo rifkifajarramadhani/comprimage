@@ -1,9 +1,26 @@
 services:
-  web:
+  # Local development: hot-reloading Vite dev server. `docker compose --profile dev up`.
+  web-dev:
+    profiles: [dev]
+    build:
+      context: .
+      target: development
+    command: bun run dev --host 0.0.0.0
+    ports:
+      - '${FRONTEND_DEV_PORT:-3000}:3000'
+    volumes:
+      # Bind-mount the source for HMR; keep the image's installed deps by masking
+      # node_modules with a named volume (so the host checkout doesn't shadow it).
+      - ./:/app
+      - comprimage_node_modules:/app/node_modules
+
+  # Production: static SPA served by nginx behind the shared Traefik edge proxy.
+  web-prod:
+    profiles: [prod]
     image: ghcr.io/rifkifajarramadhani/comprimage:${IMAGE_TAG:-latest}
     build:
       context: .
-      target: prod
+      target: production
     expose:
       - '80'
     networks:
@@ -28,6 +45,9 @@ services:
       start_period: 10s
       retries: 5
     restart: unless-stopped
+
+volumes:
+  comprimage_node_modules:
 
 networks:
   edge:
