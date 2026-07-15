@@ -6,69 +6,17 @@
 import { generateSW } from 'workbox-build'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
+import { createWorkboxConfig } from './sw-config.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const swDest = resolve(root, 'dist/client/sw.js')
 
-const { count, size, warnings } = await generateSW({
-  globDirectory: resolve(root, 'dist/client'),
-  globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json}'],
-  // Stable browser/PWA metadata URLs are revalidated through nginx instead of
-  // being trapped behind the active worker's precache. Application documents
-  // and content-hashed build assets remain available offline.
-  globIgnores: [
-    'manifest.json',
-    'favicon.ico',
-    'apple-touch-icon.png',
-    'comprimage-mark.svg',
-    'icons/**',
-  ],
-  swDest,
-  // Fully automatic updates: a new build activates immediately (skipWaiting)
-  // and takes control of every open tab (clientsClaim), even mid-task — see
-  // src/components/pwa/PwaUpdater.tsx, which listens for the resulting
-  // controllerchange and reloads the page.
-  clientsClaim: true,
-  skipWaiting: true,
-  cleanupOutdatedCaches: true,
-  // Route/worker chunks can exceed the 2 MiB default.
-  maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-  // No navigateFallback: this is a prerendered multi-page site, not a single-shell
-  // SPA. Each route has its own document (/resize/index.html, …), and clean-URL
-  // navigations like `/resize` do NOT match the precache entry, so a fallback of
-  // `/index.html` would serve the HOME document for every tool route. The client
-  // then hydrates home's DOM + router state against a `/resize` URL — a hydration
-  // mismatch (React #418) and a TanStack Router "Invariant failed" — before
-  // re-rendering to the correct route. It also broke direct hits on /sitemap.xml
-  // and /robots.txt (served index.html → blank until hard reload). Without a
-  // fallback, navigations resolve from precache when matched, else from the
-  // network (nginx serves the correct per-route HTML via try_files). Trade-off:
-  // deep-linking to a not-yet-visited route while fully offline won't resolve.
-  runtimeCaching: [
-    {
-      // Google Fonts stylesheet + font files, so type still renders offline.
-      urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'google-fonts',
-        expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
-        cacheableResponse: { statuses: [0, 200] },
-      },
-    },
-    {
-      // @jsquash codec `.wasm` binaries are loaded lazily per format. Cache each
-      // on first use so subsequent (and offline) encodes don't refetch it — and
-      // so the install stays lean instead of precaching every codec upfront.
-      urlPattern: /\.wasm$/,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'jsquash-codecs',
-        expiration: { maxEntries: 12, maxAgeSeconds: 60 * 60 * 24 * 365 },
-        cacheableResponse: { statuses: [0, 200] },
-      },
-    },
-  ],
-})
+const { count, size, warnings } = await generateSW(
+  createWorkboxConfig({
+    globDirectory: resolve(root, 'dist/client'),
+    swDest,
+  }),
+)
 
 for (const warning of warnings) console.warn(warning)
 console.log(
