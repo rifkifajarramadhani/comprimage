@@ -12,7 +12,7 @@ import Sparkles from 'lucide-react/dist/esm/icons/sparkles'
 import { Container } from '#/components/layout/Container.tsx'
 import { Dropzone } from '#/components/upload/Dropzone.tsx'
 import { useImageStore } from '#/stores/image-store.ts'
-import { createSeoHead, WEBSITE_JSON_LD } from '#/lib/seo.ts'
+import { createSeoHead, SITE_JSON_LD } from '#/lib/seo.ts'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -29,7 +29,7 @@ export const Route = createFileRoute('/')({
       scripts: [
         {
           type: 'application/ld+json',
-          children: JSON.stringify(WEBSITE_JSON_LD),
+          children: JSON.stringify(SITE_JSON_LD),
         },
       ],
     }
@@ -75,6 +75,33 @@ const QUALITY_POINTS = [
   },
 ] as const
 
+const OVERVIEW = [
+  {
+    to: '/compress',
+    title: 'Compress images without visible quality loss',
+    body: 'Re-encode a photo with MozJPEG, libwebp, libaom, or libjxl and watch the file size fall while the image stays the same on screen. Auto quality searches for the smallest file that still clears a perceptual similarity target, so you get the saving without guessing at a number.',
+    cta: 'Compress an image',
+  },
+  {
+    to: '/resize',
+    title: 'Resize images while keeping them sharp',
+    body: 'Set a width, height, longest edge, or percentage, with aspect ratio locked so nothing stretches. Large reductions run through progressive halving rather than one destructive jump, which is what keeps edges and fine texture from turning to mush.',
+    cta: 'Resize an image',
+  },
+  {
+    to: '/convert',
+    title: 'Convert between modern image formats',
+    body: 'Move images between JPG, PNG, WebP, AVIF, and JPEG XL. AVIF and JPEG XL are encoded through WebAssembly, so they work even in browsers that cannot produce them natively — useful when the format you need is not the one you were given.',
+    cta: 'Convert a format',
+  },
+  {
+    to: '/batch',
+    title: 'Process a whole folder at once',
+    body: 'Apply one set of output options across many images at the same time. A pool of Web Workers encodes them in parallel off the main thread, then packages the finished set into a single ZIP built in the browser.',
+    cta: 'Open batch mode',
+  },
+] as const
+
 const PRIVACY_STEPS = [
   { icon: FolderOpen, title: 'Choose files', body: 'From your device' },
   { icon: Cpu, title: 'Process locally', body: 'Inside your browser' },
@@ -92,12 +119,17 @@ function Home() {
         <section className="grid gap-10 lg:grid-cols-[1.18fr_0.82fr] lg:gap-12">
           <div className="flex min-w-0 flex-col">
             <p className="terminal-label">[ image optimization, locally ]</p>
+            {/* The command line is decoration; the sr-only title is the
+                heading's real text content, for screen readers and crawlers. */}
             <h1 className="command-title mt-5">
-              <span className="command-prompt" aria-hidden>
-                ${' '}
+              <span className="sr-only">
+                Compress, resize, and convert images in your browser
               </span>
-              comprimage optimize
-              <span className="command-caret" aria-hidden />
+              <span aria-hidden>
+                <span className="command-prompt">$ </span>
+                comprimage optimize
+                <span className="command-caret" />
+              </span>
             </h1>
             <p className="text-body-text mt-5 max-w-2xl text-base leading-7">
               Make images lighter. Keep them looking right.
@@ -204,6 +236,37 @@ function Home() {
           </section>
         </Container>
       </div>
+
+      <Container className="py-12 sm:py-16">
+        <p className="terminal-label">[ what you can do here ]</p>
+        <h2 className="text-foreground mt-4 text-xl font-bold tracking-[-0.03em]">
+          A complete image toolkit that never uploads anything
+        </h2>
+        <p className="text-body-text mt-3 max-w-2xl leading-7">
+          Most online image tools work by sending your files to a server you
+          have no visibility into. Comprimage does the same work with
+          WebAssembly codecs running inside your own browser tab, which means
+          there is no upload wait, no queue, no account, and nothing left behind
+          to delete afterwards.
+        </p>
+        <div className="mt-8 grid max-w-4xl gap-8 sm:grid-cols-2">
+          {OVERVIEW.map(({ to, title, body, cta }) => (
+            <article key={to}>
+              <h3 className="text-foreground font-semibold">{title}</h3>
+              <p className="text-muted-foreground mt-2 text-sm leading-6">
+                {body}
+              </p>
+              <Link
+                to={to}
+                className="text-brand mt-3 inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+              >
+                {cta}
+                <ArrowRight className="size-3.5" aria-hidden />
+              </Link>
+            </article>
+          ))}
+        </div>
+      </Container>
     </>
   )
 }

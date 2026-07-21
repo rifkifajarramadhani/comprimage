@@ -23,12 +23,14 @@ export function ToolWorkspace({
   command,
   options,
   controls,
+  guide,
 }: {
   title: string
   description: string
   command: string
   options: ProcessOptions
   controls: React.ReactNode
+  guide?: React.ReactNode
 }) {
   const source = useImageStore((s) => s.source)
   const setSource = useImageStore((s) => s.setSource)
@@ -38,12 +40,15 @@ export function ToolWorkspace({
   return (
     <Container className="py-7 sm:py-9">
       <header className="border-border mb-6 flex flex-col gap-4 border-b pb-6 lg:flex-row lg:items-center lg:gap-10">
-        <h1 className="command-title shrink-0" aria-label={title}>
-          <span className="command-prompt" aria-hidden>
-            ${' '}
+        {/* The command line is decoration; the sr-only title is the heading's
+            real text content, for both screen readers and crawlers. */}
+        <h1 className="command-title shrink-0">
+          <span className="sr-only">{title}</span>
+          <span aria-hidden>
+            <span className="command-prompt">$ </span>
+            {command}
+            <span className="command-caret" />
           </span>
-          {command}
-          <span className="command-caret" aria-hidden />
         </h1>
         <p className="page-description max-w-2xl lg:border-l lg:border-border lg:pl-8">
           {description}
@@ -128,6 +133,8 @@ export function ToolWorkspace({
           </div>
         </div>
       )}
+
+      {guide}
     </Container>
   )
 }

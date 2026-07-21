@@ -52,8 +52,13 @@ export function applyTheme(pref: ThemePreference): ResolvedTheme {
   root.classList.remove('light', 'dark')
   root.classList.add(resolved)
 
-  const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) meta.setAttribute('content', THEME_COLOR[resolved])
+  // The document ships two media-scoped theme-color tags so the static HTML is
+  // correct before any script runs. Once we know the resolved register, collapse
+  // them: drop `media` so the explicit value applies regardless of OS setting.
+  for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+    meta.removeAttribute('media')
+    meta.setAttribute('content', THEME_COLOR[resolved])
+  }
 
   return resolved
 }

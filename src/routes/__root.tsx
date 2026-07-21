@@ -21,7 +21,9 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { name: 'theme-color', content: '#fdfcfc' },
+      // theme-color is not declared here: the router's head merge dedupes meta
+      // by `name`, which would drop one of the two media variants. They are
+      // rendered directly into <head> in RootDocument instead.
       {
         name: 'description',
         content:
@@ -78,13 +80,26 @@ function NotFoundPage() {
 // Runs before first paint: resolve the persisted theme (mirrored to a standalone
 // key by the settings store) and set the register class on <html> so there is no
 // dark→light flash on reload. Kept dependency-free — it can't import modules.
-const NO_FOUC_SCRIPT = `(function(){try{var p=localStorage.getItem('comprimage-theme')||'system';var d=p==='dark'||(p!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.remove('light','dark');c.add(d?'dark':'light');var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',d?'#171514':'#fdfcfc');}catch(e){}})();`
+const NO_FOUC_SCRIPT = `(function(){try{var p=localStorage.getItem('comprimage-theme')||'system';var d=p==='dark'||(p!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.remove('light','dark');c.add(d?'dark':'light');var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++){m[i].removeAttribute('media');m[i].setAttribute('content',d?'#171514':'#fdfcfc');}}catch(e){}})();`
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        {/* Both registers are declared so the static HTML is already correct
+            for either OS setting; the script below then collapses them to the
+            user's explicit preference before first paint. */}
+        <meta
+          name="theme-color"
+          content="#fdfcfc"
+          media="(prefers-color-scheme: light)"
+        />
+        <meta
+          name="theme-color"
+          content="#171514"
+          media="(prefers-color-scheme: dark)"
+        />
         <script dangerouslySetInnerHTML={{ __html: NO_FOUC_SCRIPT }} />
       </head>
       <body>

@@ -9,12 +9,41 @@ const siteUrl = 'https://comprimage.rifkiramadhani.my.id'
 const socialImageUrl = `${siteUrl}/og/comprimage-social.png`
 const initialGzipBaseline = 182_220
 
+// `keyword` must appear in the page's <h1> text; `minWords` guards against the
+// thin-content regression where a tool page renders only a heading and a
+// dropzone (everything else being gated behind a dropped file).
+const MIN_INDEXABLE_WORDS = 200
+
 const pages = [
-  { path: '/', file: 'index.html', indexable: true },
-  { path: '/resize', file: 'resize/index.html', indexable: true },
-  { path: '/compress', file: 'compress/index.html', indexable: true },
-  { path: '/convert', file: 'convert/index.html', indexable: true },
-  { path: '/batch', file: 'batch/index.html', indexable: true },
+  { path: '/', file: 'index.html', indexable: true, keyword: 'images' },
+  {
+    path: '/resize',
+    file: 'resize/index.html',
+    indexable: true,
+    keyword: 'Resize',
+    faq: true,
+  },
+  {
+    path: '/compress',
+    file: 'compress/index.html',
+    indexable: true,
+    keyword: 'Compress',
+    faq: true,
+  },
+  {
+    path: '/convert',
+    file: 'convert/index.html',
+    indexable: true,
+    keyword: 'Convert',
+    faq: true,
+  },
+  {
+    path: '/batch',
+    file: 'batch/index.html',
+    indexable: true,
+    keyword: 'Batch',
+    faq: true,
+  },
   { path: '/about', file: 'about/index.html', indexable: true },
   { path: '/settings', file: 'settings/index.html', indexable: false },
 ]
@@ -54,6 +83,25 @@ function one(document, selector, pagePath) {
 
 function canonicalFor(path) {
   return path === '/' ? `${siteUrl}/` : `${siteUrl}${path}`
+}
+
+/** Every JSON-LD node on the page, flattening any @graph containers. */
+function jsonLdNodes(document) {
+  const nodes = []
+  for (const script of document.querySelectorAll(
+    'script[type="application/ld+json"]',
+  )) {
+    const parsed = JSON.parse(script.textContent)
+    nodes.push(...(parsed['@graph'] ?? [parsed]))
+  }
+  return nodes
+}
+
+/** Visible text as a crawler would read it, scripts and styles removed. */
+function visibleText(document) {
+  const clone = document.body.cloneNode(true)
+  for (const node of clone.querySelectorAll('script, style')) node.remove()
+  return clone.textContent.replace(/\s+/g, ' ').trim()
 }
 
 const titles = new Set()
@@ -116,10 +164,69 @@ for (const page of pages) {
     `${page.path}: unexpected social image`,
   )
 
+  const nodes = jsonLdNodes(document)
+  const text = visibleText(document)
+
+  // Both media variants must survive: the router's head merge dedupes meta by
+  // `name`, so declaring these through `head()` would silently drop one.
+  const themeColors = [
+    ...document.querySelectorAll('meta[name="theme-color"]'),
+  ].map((meta) => meta.getAttribute('media'))
+  assert(
+    themeColors.includes('(prefers-color-scheme: light)') &&
+      themeColors.includes('(prefers-color-scheme: dark)'),
+    `${page.path}: expected light and dark theme-color tags, got ${themeColors.length}`,
+  )
+
+  // Exactly one h1, carrying the page's primary keyword as real text content
+  // (an aria-label would be invisible to a crawler).
+  const h1 = one(document, 'h1', page.path).textContent.trim()
+  if (page.keyword) {
+    assert(
+      h1.toLowerCase().includes(page.keyword.toLowerCase()),
+      `${page.path}: h1 "${h1}" is missing keyword "${page.keyword}"`,
+    )
+  }
+
+  if (page.faq) {
+    const faq = nodes.find((node) => node['@type'] === 'FAQPage')
+    assert(faq, `${page.path}: missing FAQPage JSON-LD`)
+    assert(
+      faq.mainEntity.length >= 3,
+      `${page.path}: FAQPage has only ${faq.mainEntity.length} questions`,
+    )
+    // Google requires every marked-up answer to be visible on the page.
+    for (const entry of faq.mainEntity) {
+      assert(
+        text.includes(entry.name),
+        `${page.path}: FAQ question is not visible on the page: ${entry.name}`,
+      )
+      assert(
+        text.includes(entry.acceptedAnswer.text),
+        `${page.path}: FAQ answer is not visible on the page: ${entry.name}`,
+      )
+    }
+  }
+
   const robots = one(document, 'meta[name="robots"]', page.path).getAttribute(
     'content',
   )
   if (page.indexable) {
+    const words = text.split(' ').length
+    assert(
+      words >= MIN_INDEXABLE_WORDS,
+      `${page.path}: only ${words} indexable words (minimum ${MIN_INDEXABLE_WORDS})`,
+    )
+
+    if (page.path !== '/') {
+      const crumbs = nodes.find((node) => node['@type'] === 'BreadcrumbList')
+      assert(crumbs, `${page.path}: missing BreadcrumbList JSON-LD`)
+      assert(
+        crumbs.itemListElement.at(-1).item === canonicalFor(page.path),
+        `${page.path}: BreadcrumbList does not end at the canonical URL`,
+      )
+    }
+
     assert(!robots.includes('noindex'), `${page.path}: unexpectedly noindex`)
     assert(!titles.has(title), `${page.path}: duplicate title ${title}`)
     assert(
@@ -138,10 +245,28 @@ for (const page of pages) {
 
 const home = new JSDOM(readFileSync(resolve(output, 'index.html'), 'utf8'))
   .window.document
-const jsonLd = one(home, 'script[type="application/ld+json"]', '/')
-const website = JSON.parse(jsonLd.textContent)
-assert(website['@type'] === 'WebSite', '/: missing WebSite JSON-LD')
+const homeNodes = jsonLdNodes(home)
+const nodeOfType = (type) => homeNodes.find((node) => node['@type'] === type)
+
+const website = nodeOfType('WebSite')
+assert(website, '/: missing WebSite JSON-LD')
 assert(website.url === `${siteUrl}/`, '/: incorrect WebSite URL')
+
+const webapp = nodeOfType('WebApplication')
+assert(webapp, '/: missing WebApplication JSON-LD')
+assert(
+  webapp.applicationCategory && webapp.operatingSystem,
+  '/: WebApplication is missing applicationCategory/operatingSystem',
+)
+assert(webapp.offers?.price === '0', '/: WebApplication is not marked free')
+
+const publisher = nodeOfType('Person') ?? nodeOfType('Organization')
+assert(publisher, '/: missing Person/Organization publisher JSON-LD')
+assert(
+  website.publisher?.['@id'] === publisher['@id'] &&
+    webapp.publisher?.['@id'] === publisher['@id'],
+  '/: WebSite/WebApplication do not reference the publisher @id',
+)
 
 const sitemap = readFileSync(resolve(output, 'sitemap.xml'), 'utf8')
 for (const page of pages.filter((candidate) => candidate.indexable)) {

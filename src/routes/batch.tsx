@@ -21,7 +21,66 @@ import { BatchList } from '#/components/batch/BatchList.tsx'
 import { FormatSelect } from '#/components/controls/FormatSelect.tsx'
 import { CompressControls } from '#/components/controls/CompressControls.tsx'
 import { Button } from '#/components/ui/button.tsx'
+import { ToolGuide } from '#/components/layout/ToolGuide.tsx'
 import { createSeoHead } from '#/lib/seo.ts'
+import type { FaqEntry } from '#/lib/seo.ts'
+
+const STEPS = [
+  {
+    title: 'Add the whole set at once',
+    body: 'Drop in or select as many images as you need — JPG, PNG, WebP, AVIF, and GIF are accepted, up to 50 MB each. There is no file-count limit, because there is no upload and no server-side queue to wait in.',
+  },
+  {
+    title: 'Set the output once, apply it to everything',
+    body: 'One format, quality, and effort setting is applied across the entire set. Each file is processed independently, so a mix of sizes and source formats is fine.',
+  },
+  {
+    title: 'Download the results as a single ZIP',
+    body: 'The queue reports progress per file plus the combined size saving across the batch. When it finishes, one button packages every finished image into a ZIP that is assembled in the browser.',
+  },
+]
+
+const NOTES = [
+  {
+    title: 'Files are processed in parallel',
+    body: 'A pool of Web Workers runs the codecs off the main thread, so the interface stays responsive and several images encode at the same time. The queue fills each worker as it becomes free rather than processing strictly one at a time.',
+  },
+  {
+    title: 'Concurrency is tunable',
+    body: 'The worker count defaults to the number of logical cores your device reports and can be changed in Settings, up to a maximum of eight. Raising it speeds up large batches; lowering it leaves more CPU for everything else while a slow AVIF batch runs.',
+  },
+  {
+    title: 'Encoding cost varies by format',
+    body: 'A batch encoded to WebP finishes far faster than the same batch encoded to AVIF at high effort. For a large set, it is worth testing your settings on a single image first on the compress page.',
+  },
+  {
+    title: 'Nothing leaves the machine',
+    body: 'Batch mode has exactly the same privacy properties as the single-image tools: every file is decoded, encoded, and zipped locally. No batch is ever uploaded, and closing the tab discards everything.',
+  },
+]
+
+const FAQ: Array<FaqEntry> = [
+  {
+    question: 'How many images can I process at once?',
+    answer:
+      'There is no fixed limit on the number of files, only on their individual size, which is capped at 50 MB. Because processing happens on your own machine, the practical ceiling for a very large batch is your available memory.',
+  },
+  {
+    question: 'Are batch-processed images uploaded to a server?',
+    answer:
+      'No. Every image in the batch is decoded, re-encoded, and packaged into the ZIP entirely inside your browser. Nothing is transmitted, so there is no size quota and no waiting in a queue behind other users.',
+  },
+  {
+    question: 'Can I apply different settings to different images?',
+    answer:
+      'Batch mode deliberately applies one set of options to the whole group, which is what makes it fast and predictable. For per-image tuning, use the compress, resize, or convert tools individually.',
+  },
+  {
+    question: 'Why is my batch processing slowly?',
+    answer:
+      'AVIF and JPEG XL at high effort are computationally expensive, and very large source images take longer to decode. Try WebP, lower the effort setting, or raise the worker concurrency in Settings.',
+  },
+]
 
 export const Route = createFileRoute('/batch')({
   component: BatchPage,
@@ -31,6 +90,8 @@ export const Route = createFileRoute('/batch')({
       title: 'Batch Compress and Convert Images | Comprimage',
       description:
         'Compress or convert multiple images with one set of options, then download a ZIP. Every file is processed locally in your browser.',
+      breadcrumb: 'Batch processing',
+      faq: FAQ,
     }),
 })
 
@@ -87,7 +148,7 @@ function BatchPage() {
   return (
     <Container className="py-7 sm:py-9">
       <PageIntro
-        title="Process images in bulk"
+        title="Batch compress and convert images"
         command="comprimage batch"
         description="Apply one output setting to a group of images and download the finished files together as a ZIP."
         className="mb-6"
@@ -187,6 +248,14 @@ function BatchPage() {
           )}
         </div>
       </div>
+
+      <ToolGuide
+        heading="How to compress or convert many images at once"
+        intro="Processing a folder one file at a time is the slowest part of preparing images for the web. Batch mode applies a single set of options across the whole set in parallel, then hands back one ZIP — without any of it leaving your machine."
+        steps={STEPS}
+        notes={NOTES}
+        faq={FAQ}
+      />
     </Container>
   )
 }

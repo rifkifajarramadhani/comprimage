@@ -18,6 +18,7 @@ export const Route = createFileRoute('/about')({
       title: 'How Comprimage Processes Images Privately | Comprimage',
       description:
         'Learn how Comprimage uses modern codecs, progressive resizing, and perceptual quality checks to process images locally in your browser.',
+      breadcrumb: 'About',
     }),
 })
 
