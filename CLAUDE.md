@@ -45,5 +45,5 @@ Run a single test: `bunx vitest run src/lib/resize.test.ts` (or `bunx vitest -t 
 
 ## Build & deploy specifics
 
-- `vite.config.ts` explicitly prerenders every application route, generates the sitemap, and pins the prerender preview server to `127.0.0.1` (avoids IPv4/IPv6 mismatch during prerender in containers). `scripts/verify-seo.mjs` validates the emitted route metadata and initial bundle budget.
+- `vite.config.ts` explicitly prerenders every application route, generates the sitemap, and pins the prerender preview server to `127.0.0.1` (avoids IPv4/IPv6 mismatch during prerender in containers). `scripts/verify-seo.mjs` validates the emitted route metadata and initial bundle budget. `INITIAL_GZIP_BUDGET` there is a ceiling, not a ratchet — the same commit measures ~1.5KB larger under Docker's Bun than locally, so it carries deliberate headroom. Lower it when an optimization actually shrinks the bundle; raise it only as a conscious decision.
 - Two-stage Docker: `oven/bun` build → `nginx` serving `dist/client`. The image uses Bun because `oven/bun` has no `node` binary. Served behind a shared Traefik edge proxy (no host ports). CI (`.github/workflows/deploy.yml`) builds on push to `main`, pushes to GHCR, and SSH-deploys.
