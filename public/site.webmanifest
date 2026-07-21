@@ -1,0 +1,38 @@
+{
+  "name": "Comprimage — Image Toolkit",
+  "short_name": "Comprimage",
+  "description": "Compress, resize, and convert images entirely in your browser. Nothing is uploaded.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fdfcfc",
+  "theme_color": "#3f9465",
+  "categories": ["photo", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/comprimage-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/comprimage-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/comprimage-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/comprimage-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

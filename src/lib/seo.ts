@@ -2,7 +2,7 @@ export const SITE_URL = 'https://comprimage.rifkiramadhani.my.id'
 
 const SOCIAL_IMAGE_PATH = '/og/comprimage-social.png'
 const SOCIAL_IMAGE_ALT =
-  'Comprimage — private image tools with nothing uploaded'
+  'Comprimage logo with the message “Private image tools. Nothing uploaded.” and a list of image tools'
 
 /** One question/answer pair, rendered visibly *and* emitted as FAQPage JSON-LD. */
 export interface FaqEntry {

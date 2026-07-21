@@ -7,6 +7,8 @@ const root = resolve(import.meta.dirname, '..')
 const output = resolve(root, 'dist/client')
 const siteUrl = 'https://comprimage.rifkiramadhani.my.id'
 const socialImageUrl = `${siteUrl}/og/comprimage-social.png`
+const socialImageAlt =
+  'Comprimage logo with the message “Private image tools. Nothing uploaded.” and a list of image tools'
 const initialGzipBaseline = 182_220
 
 // `keyword` must appear in the page's <h1> text; `minWords` guards against the
@@ -85,6 +87,68 @@ function canonicalFor(path) {
   return path === '/' ? `${siteUrl}/` : `${siteUrl}${path}`
 }
 
+function assertBrandLinks(document, pagePath) {
+  const svgIcon = one(
+    document,
+    'link[rel="icon"][type="image/svg+xml"]',
+    pagePath,
+  )
+  assert(
+    svgIcon.getAttribute('href') === '/comprimage-mark.svg' &&
+      svgIcon.getAttribute('sizes') === 'any',
+    `${pagePath}: unexpected SVG favicon link`,
+  )
+
+  const icoIcon = one(
+    document,
+    'link[rel="icon"][type="image/x-icon"]',
+    pagePath,
+  )
+  assert(
+    icoIcon.getAttribute('href') === '/favicon.ico' &&
+      icoIcon.getAttribute('sizes') === '16x16 32x32 48x48 64x64',
+    `${pagePath}: unexpected ICO favicon link`,
+  )
+
+  const appleIcon = one(document, 'link[rel="apple-touch-icon"]', pagePath)
+  assert(
+    appleIcon.getAttribute('href') === '/apple-touch-icon.png' &&
+      appleIcon.getAttribute('type') === 'image/png' &&
+      appleIcon.getAttribute('sizes') === '180x180',
+    `${pagePath}: unexpected Apple touch icon link`,
+  )
+
+  assert(
+    one(document, 'link[rel="manifest"]', pagePath).getAttribute('href') ===
+      '/site.webmanifest',
+    `${pagePath}: unexpected web app manifest link`,
+  )
+}
+
+function pngInfo(file, label) {
+  const png = readFileSync(file)
+  assert(png.toString('ascii', 1, 4) === 'PNG', `${label}: not a PNG`)
+  return {
+    width: png.readUInt32BE(16),
+    height: png.readUInt32BE(20),
+    bitDepth: png[24],
+    colorType: png[25],
+  }
+}
+
+function assertPng(relativePath, size, colorType) {
+  const info = pngInfo(resolve(output, relativePath), relativePath)
+  assert(
+    info.width === size && info.height === size,
+    `${relativePath}: expected ${size}x${size}, got ${info.width}x${info.height}`,
+  )
+  assert(info.bitDepth === 8, `${relativePath}: expected 8-bit color`)
+  assert(
+    info.colorType === colorType,
+    `${relativePath}: expected PNG color type ${colorType}, got ${info.colorType}`,
+  )
+}
+
 /** Every JSON-LD node on the page, flattening any @graph containers. */
 function jsonLdNodes(document) {
   const nodes = []
@@ -125,6 +189,8 @@ for (const page of pages) {
     page.path,
   ).getAttribute('href')
 
+  assertBrandLinks(document, page.path)
+
   assert(title, `${page.path}: title is empty`)
   assert(description, `${page.path}: description is empty`)
   assert(
@@ -162,6 +228,15 @@ for (const page of pages) {
       'content',
     ) === socialImageUrl,
     `${page.path}: unexpected social image`,
+  )
+  assert(
+    one(document, 'meta[property="og:image:alt"]', page.path).getAttribute(
+      'content',
+    ) === socialImageAlt &&
+      one(document, 'meta[name="twitter:image:alt"]', page.path).getAttribute(
+        'content',
+      ) === socialImageAlt,
+    `${page.path}: unexpected social image alt text`,
   )
 
   const nodes = jsonLdNodes(document)
@@ -283,12 +358,88 @@ assert(
   'robots.txt: missing sitemap declaration',
 )
 
-const socialImage = readFileSync(resolve(output, 'og/comprimage-social.png'))
-assert(socialImage.toString('ascii', 1, 4) === 'PNG', 'social image: not a PNG')
+const socialImage = pngInfo(
+  resolve(output, 'og/comprimage-social.png'),
+  'social image',
+)
 assert(
-  socialImage.readUInt32BE(16) === 1200 && socialImage.readUInt32BE(20) === 630,
+  socialImage.width === 1200 && socialImage.height === 630,
   'social image: expected 1200x630',
 )
+assert(
+  socialImage.bitDepth === 8 && socialImage.colorType === 2,
+  'social image: expected an opaque 8-bit RGB PNG',
+)
+
+const mark = readFileSync(resolve(output, 'comprimage-mark.svg'), 'utf8')
+assert(mark.includes('<svg'), 'brand mark: not an SVG')
+assert(
+  mark.includes('#3f9465') && mark.includes('#fdfcfc'),
+  'brand mark: does not use the expected brand colors',
+)
+
+const favicon = readFileSync(resolve(output, 'favicon.ico'))
+assert(
+  favicon.readUInt16LE(0) === 0 && favicon.readUInt16LE(2) === 1,
+  'favicon: invalid ICO header',
+)
+const faviconCount = favicon.readUInt16LE(4)
+assert(faviconCount === 4, `favicon: expected 4 frames, got ${faviconCount}`)
+const faviconSizes = Array.from({ length: faviconCount }, (_, index) => {
+  const width = favicon[6 + index * 16]
+  const height = favicon[7 + index * 16]
+  return [width || 256, height || 256]
+})
+assert(
+  JSON.stringify(faviconSizes) ===
+    JSON.stringify([
+      [16, 16],
+      [32, 32],
+      [48, 48],
+      [64, 64],
+    ]),
+  `favicon: unexpected frame sizes ${JSON.stringify(faviconSizes)}`,
+)
+
+assertPng('apple-touch-icon.png', 180, 2)
+assertPng('icons/comprimage-192.png', 192, 6)
+assertPng('icons/comprimage-512.png', 512, 6)
+assertPng('icons/comprimage-maskable-192.png', 192, 2)
+assertPng('icons/comprimage-maskable-512.png', 512, 2)
+
+const manifest = JSON.parse(readFileSync(resolve(output, 'site.webmanifest')))
+assert(manifest.name === 'Comprimage — Image Toolkit', 'manifest: wrong name')
+assert(manifest.short_name === 'Comprimage', 'manifest: wrong short name')
+assert(
+  manifest.id === '/' && manifest.start_url === '/' && manifest.scope === '/',
+  'manifest: expected root id, start URL, and scope',
+)
+assert(manifest.display === 'standalone', 'manifest: wrong display mode')
+assert(
+  manifest.background_color === '#fdfcfc' && manifest.theme_color === '#3f9465',
+  'manifest: wrong brand colors',
+)
+const expectedManifestIcons = [
+  ['/icons/comprimage-192.png', '192x192', 'any'],
+  ['/icons/comprimage-512.png', '512x512', 'any'],
+  ['/icons/comprimage-maskable-192.png', '192x192', 'maskable'],
+  ['/icons/comprimage-maskable-512.png', '512x512', 'maskable'],
+]
+assert(
+  manifest.icons.length === expectedManifestIcons.length &&
+    manifest.icons.every(
+      (icon, index) =>
+        icon.src === expectedManifestIcons[index][0] &&
+        icon.sizes === expectedManifestIcons[index][1] &&
+        icon.type === 'image/png' &&
+        icon.purpose === expectedManifestIcons[index][2],
+    ),
+  'manifest: unexpected icon declarations',
+)
+
+const notFound = new JSDOM(readFileSync(resolve(output, '404.html'), 'utf8'))
+  .window.document
+assertBrandLinks(notFound, '/404.html')
 
 assert(
   !existsSync(resolve(output, '_shell.html')),

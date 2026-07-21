@@ -4,25 +4,48 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, follow" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="theme-color"
+      content="#fdfcfc"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#171514"
+      media="(prefers-color-scheme: dark)"
+    />
     <title>Page not found | Comprimage</title>
     <meta
       name="description"
       content="That URL does not match a page on Comprimage."
     />
-    <link rel="icon" href="/comprimage-mark.svg" type="image/svg+xml" />
+    <link
+      rel="icon"
+      href="/comprimage-mark.svg"
+      type="image/svg+xml"
+      sizes="any"
+    />
+    <link
+      rel="icon"
+      href="/favicon.ico"
+      type="image/x-icon"
+      sizes="16x16 32x32 48x48 64x64"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="/apple-touch-icon.png"
+      type="image/png"
+      sizes="180x180"
+    />
+    <link rel="manifest" href="/site.webmanifest" />
     <style>
       :root {
         color-scheme: light dark;
         font-family:
-          ui-sans-serif,
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          sans-serif;
-        background: #ffffff;
-        color: #202235;
+          'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco,
+          Consolas, monospace;
+        background: #fdfcfc;
+        color: #201d1d;
       }
       body {
         min-height: 100vh;
@@ -48,7 +71,7 @@
       p {
         margin: 16px auto 0;
         max-width: 48ch;
-        color: #5b5d70;
+        color: #646262;
         line-height: 1.65;
       }
       a {
@@ -56,24 +79,33 @@
         min-height: 44px;
         align-items: center;
         margin-top: 32px;
-        border-radius: 8px;
+        border: 1px solid #3f9465;
+        border-radius: 4px;
         padding: 0 20px;
-        background: #585ff5;
-        color: #ffffff;
+        background: #3f9465;
+        color: #fdfcfc;
         font-weight: 650;
         text-decoration: none;
       }
       a:focus-visible {
-        outline: 3px solid #858aff;
+        outline: 3px solid #3f9465;
         outline-offset: 3px;
       }
       @media (prefers-color-scheme: dark) {
         :root {
-          background: #151722;
-          color: #f2f3f8;
+          background: #171514;
+          color: #fdfcfc;
         }
         p {
-          color: #b7b9c8;
+          color: #9a9898;
+        }
+        a {
+          border-color: #72d49a;
+          background: #72d49a;
+          color: #171514;
+        }
+        a:focus-visible {
+          outline-color: #72d49a;
         }
       }
     </style>
