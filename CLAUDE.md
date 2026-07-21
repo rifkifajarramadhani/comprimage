@@ -9,7 +9,7 @@ Uses **Bun** (not npm/pnpm — the `.cursorrules` `pnpm dlx shadcn` note is outd
 ```bash
 bun install
 bun run dev              # dev server on http://localhost:3000
-bun run build            # vite build + generate-sw.mjs (emits sw.js)
+bun run build            # vite build + verify-seo.mjs
 bun run test             # vitest run (all tests, once)
 bun run lint             # eslint
 bun run format           # prettier --write . && eslint --fix
@@ -41,10 +41,9 @@ Run a single test: `bunx vitest run src/lib/resize.test.ts` (or `bunx vitest -t 
 - **Import alias**: `#/*` maps to `src/*` (defined in both `package.json` imports and tsconfig; `@/*` also works in tsconfig). Imports include the `.ts`/`.tsx` extension (`allowImportingTsExtensions`).
 - **File naming**: non-component files (`lib`, `hooks`, `stores`, `workers`, `types`) use **kebab-case** (`use-image-processor.ts`, `image-pool.ts`, `settings-store.ts`). Exported identifiers keep their JS-idiomatic casing (`useImageProcessor`, `imagePool`, `useSettingsStore`). React component files stay **PascalCase** (`Dropzone.tsx`); shadcn `ui/` files stay lowercase; `routes/*` filenames map to URLs — don't rename.
 - **UI**: shadcn/ui (Radix) in `src/components/ui`, Tailwind CSS 4. Design tokens / visual system live in `DESIGN.md`; global styles + custom utility classes (`atmos-glow`, `surface-card`, `kicker`, `display-title`) are in `src/styles.css`.
-- Components are organized by domain under `src/components` (upload, preview, controls, batch, pwa, layout, statistics).
+- Components are organized by domain under `src/components` (upload, preview, controls, batch, layout, statistics).
 
 ## Build & deploy specifics
 
-- The **service worker is generated post-build** by `scripts/generate-sw.mjs` (Workbox `generateSW`), not vite-plugin-pwa — the plugin is skipped under TanStack Start's multi-environment build. Update behavior is fully automatic: a new SW activates and claims all open tabs immediately (`skipWaiting`/`clientsClaim`), and `src/components/pwa/PwaUpdater.tsx` reloads the page on the resulting `controllerchange` — no user prompt, and this can interrupt in-progress work.
 - `vite.config.ts` explicitly prerenders every application route, generates the sitemap, and pins the prerender preview server to `127.0.0.1` (avoids IPv4/IPv6 mismatch during prerender in containers). `scripts/verify-seo.mjs` validates the emitted route metadata and initial bundle budget.
 - Two-stage Docker: `oven/bun` build → `nginx` serving `dist/client`. The image uses Bun because `oven/bun` has no `node` binary. Served behind a shared Traefik edge proxy (no host ports). CI (`.github/workflows/deploy.yml`) builds on push to `main`, pushes to GHCR, and SSH-deploys.

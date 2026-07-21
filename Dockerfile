@@ -16,8 +16,8 @@ CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
 # --- build: compile the static SPA with Bun (-> dist/client) ---
 FROM dependencies AS build
 COPY . .
-# vite build + `bun scripts/generate-sw.mjs` (Workbox service worker). SPA/static
-# mode emits everything under dist/client — there is no server bundle to run.
+# vite build + SEO verification. SPA/static mode emits everything under
+# dist/client — there is no server bundle to run.
 RUN bun run build
 
 # --- production: serve the static output with nginx ---

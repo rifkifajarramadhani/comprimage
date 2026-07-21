@@ -88,7 +88,7 @@ marketing-sized headings.
 - Never rely on color alone for success, warning, or error.
 - Use visible `:focus-visible` rings with at least 3:1 contrast.
 - Preserve logical DOM and keyboard order when layouts reflow.
-- Announce processing, completion, errors, and PWA updates with appropriate live
+- Announce processing, completion, and errors with appropriate live
   regions without repeatedly interrupting users.
 - Decorative images use empty alt text; user preview images describe their role.
 

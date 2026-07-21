@@ -15,8 +15,8 @@ export default [
     },
   },
   {
-    // public/ holds raw browser assets (service-worker snippet); scripts/ holds
-    // Node build tooling — neither belongs to the app's TS project.
+    // public/ holds raw browser assets; scripts/ holds Node build tooling —
+    // neither belongs to the app's TS project.
     ignores: [
       'eslint.config.js',
       'prettier.config.js',

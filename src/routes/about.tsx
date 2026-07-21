@@ -53,7 +53,7 @@ const DETAILS = [
   {
     icon: LockKeyhole,
     title: 'A stronger privacy model',
-    body: 'The app never receives your image data because there is no upload endpoint. Installed as a PWA, the processing tools also work offline.',
+    body: 'The app never receives your image data because there is no upload endpoint. Every decode, resize, and encode runs entirely in your browser.',
   },
 ] as const
 

@@ -13,7 +13,6 @@ import { Container } from '../components/layout/Container.tsx'
 import { SiteHeader } from '../components/layout/SiteHeader.tsx'
 import { SiteFooter } from '../components/layout/SiteFooter.tsx'
 import { AppInit } from '../components/AppInit.tsx'
-import { PwaUpdater } from '../components/pwa/PwaUpdater.tsx'
 
 import appCss from '../styles.css?url'
 
@@ -32,7 +31,6 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
-      { rel: 'manifest', href: '/manifest.json' },
       {
         rel: 'icon',
         href: '/comprimage-mark.svg',
@@ -89,7 +87,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <main className="flex-1">{children}</main>
           <SiteFooter />
         </div>
-        <PwaUpdater />
         {import.meta.env.DEV && (
           <TanStackDevtools
             config={{ position: 'bottom-right' }}

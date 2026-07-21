@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-Comprimage is a client-only React 19 and TanStack Start image-processing SPA. Application code lives in `src/`: file-based pages are in `routes/`, reusable UI is grouped by domain under `components/`, processing logic is in `lib/`, and state, hooks, shared types, and Web Workers have dedicated directories. Tests are colocated with library code as `src/lib/*.test.ts`. Static PWA assets live in `public/`; `scripts/generate-sw.mjs` creates the production service worker. Docker and nginx deployment files are under `docker/` and the repository root.
+Comprimage is a client-only React 19 and TanStack Start image-processing SPA. Application code lives in `src/`: file-based pages are in `routes/`, reusable UI is grouped by domain under `components/`, processing logic is in `lib/`, and state, hooks, shared types, and Web Workers have dedicated directories. Tests are colocated with library code as `src/lib/*.test.ts`. Static assets live in `public/`; `scripts/verify-seo.mjs` validates the production build. Docker and nginx deployment files are under `docker/` and the repository root.
 
 Do not edit `src/routeTree.gen.ts` manually. After adding or changing routes, regenerate it with the route command below. Follow `DESIGN.md` when changing the visual system.
 
@@ -12,7 +12,7 @@ Use Bun for dependency management and project scripts:
 
 - `bun install` — install dependencies from `bun.lock`.
 - `bun run dev` — start Vite at `http://localhost:3000`.
-- `bun run build` — create the static production bundle and service worker.
+- `bun run build` — create the static production bundle and verify SEO output.
 - `bun run preview` — serve the production build locally.
 - `bun run test` — run all Vitest tests once.
 - `bunx vitest run src/lib/resize.test.ts` — run one test file.
@@ -30,4 +30,4 @@ Vitest runs in jsdom. Name tests `*.test.ts` and colocate them with the module u
 
 ## Commit & Pull Request Guidelines
 
-History primarily follows Conventional Commits (`feat:`, `fix:`, `refactor:`, `ci:`); use a concise, imperative subject. Pull requests should explain the behavior change, list verification commands, and link relevant issues. Include before/after screenshots for UI changes and call out PWA, worker, codec, or deployment implications.
+History primarily follows Conventional Commits (`feat:`, `fix:`, `refactor:`, `ci:`); use a concise, imperative subject. Pull requests should explain the behavior change, list verification commands, and link relevant issues. Include before/after screenshots for UI changes and call out worker, codec, or deployment implications.

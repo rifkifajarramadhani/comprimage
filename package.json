@@ -8,8 +8,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "build": "vite build && bun scripts/generate-sw.mjs && bun scripts/verify-seo.mjs",
-    "generate-sw": "node scripts/generate-sw.mjs",
+    "build": "vite build && bun scripts/verify-seo.mjs",
     "verify-seo": "bun scripts/verify-seo.mjs",
     "preview": "vite preview",
     "test": "vitest run",
@@ -69,8 +68,7 @@
     "prettier": "^3.8.1",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
-    "vitest": "^4.1.5",
-    "workbox-build": "^7.4.1"
+    "vitest": "^4.1.5"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

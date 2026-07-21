@@ -1,6 +1,6 @@
 # Comprimage
 
-Fast, privacy-first image toolkit. Resize, compress, and convert images entirely in your browser — images never leave your device. No uploads, no accounts, no waiting. Installable as a PWA for offline use.
+Fast, privacy-first image toolkit. Resize, compress, and convert images entirely in your browser — images never leave your device. No uploads, no accounts, no waiting.
 
 Live at **https://comprimage.rifkiramadhani.my.id**
 
@@ -11,7 +11,6 @@ Live at **https://comprimage.rifkiramadhani.my.id**
 - **Convert** — move between JPG, PNG, WebP, and AVIF
 - **Batch** — queue multiple images and download results as a ZIP
 - **Settings** — theme preference, default output format/quality, worker concurrency
-- **PWA** — offline-capable via a Workbox-generated service worker
 
 ## Tech stack
 
@@ -27,10 +26,10 @@ Live at **https://comprimage.rifkiramadhani.my.id**
 ```
 comprimage/
 ├── docker/nginx/          # nginx prerendered-route config
-├── public/                # PWA, social, robots, and error assets
-├── scripts/               # Workbox generation and SEO verification
+├── public/                # favicon, social, robots, and error assets
+├── scripts/               # SEO verification
 ├── src/
-│   ├── components/        # UI by domain (upload, preview, controls, batch, pwa, layout, ui)
+│   ├── components/        # UI by domain (upload, preview, controls, batch, layout, ui)
 │   ├── hooks/             # useImageProcessor, useImageQueue
 │   ├── lib/               # pipeline (process, resize, compress, convert, canvas, zip, download)
 │   ├── routes/            # file-based pages (index, resize, compress, convert, batch, settings)
@@ -86,7 +85,7 @@ bun run format
 bun run check
 ```
 
-`build` prerenders every route, emits the Workbox service worker, and verifies the generated SEO metadata, sitemap, social image, and initial bundle size. The Docker image uses Bun because the `oven/bun` image has no `node` binary.
+`build` prerenders every route and verifies the generated SEO metadata, sitemap, social image, and initial bundle size. The Docker image uses Bun because the `oven/bun` image has no `node` binary.
 
 ## Deployment (Docker)
 
@@ -95,7 +94,7 @@ Comprimage is a **100% client-side application with prerendered static HTML** (n
 Files:
 
 - `Dockerfile` — shared `dependencies` stage (`bun install --frozen-lockfile`) fanning out to a `development` stage (Vite dev server) and a `build` → `production` stage (`bun run build` → `nginx:1.27-alpine` serving `dist/client`)
-- `docker/nginx/comprimage.conf` — clean prerendered route serving, real document/asset 404s, `no-cache` headers for `sw.js` / `manifest.json`, and long-lived caching for hashed `/assets`
+- `docker/nginx/comprimage.conf` — clean prerendered route serving, real document/asset 404s, `no-cache` headers for branding assets, and long-lived caching for hashed `/assets`
 - `docker-compose.yml` — two Compose profiles: `web-dev` (`--profile dev`) and `web-prod` (`--profile prod`, on the external `edge` network)
 - `.env.example` — copy to `.env` to override `FRONTEND_DEV_PORT` (dev host port) and `IMAGE_TAG` (prod image)
 

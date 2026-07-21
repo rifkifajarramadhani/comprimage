@@ -8,7 +8,6 @@ import Menu from 'lucide-react/dist/esm/icons/menu'
 import Repeat2 from 'lucide-react/dist/esm/icons/repeat-2'
 import Settings from 'lucide-react/dist/esm/icons/settings'
 import { Container } from './Container.tsx'
-import { InstallButton } from '#/components/pwa/InstallButton.tsx'
 import { Button } from '#/components/ui/button.tsx'
 
 const PRIMARY_NAV = [
@@ -77,11 +76,9 @@ export function SiteHeader() {
           {SECONDARY_NAV.map((item) => (
             <NavLink key={item.to} item={item} />
           ))}
-          <InstallButton />
         </div>
 
         <div className="ml-auto flex items-center gap-2 lg:hidden">
-          <InstallButton />
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <Button
