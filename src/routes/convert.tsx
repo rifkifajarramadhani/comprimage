@@ -31,10 +31,12 @@ function ConvertPage() {
   return (
     <ToolWorkspace
       title="Convert formats"
+      command="comprimage convert"
       description="Change between JPG, PNG, WebP, AVIF, and JPEG XL with local WebAssembly codecs."
       options={options}
       controls={
         <div className="grid gap-5">
+          <p className="terminal-label">[ output ]</p>
           <FormatSelect
             value={encode.format}
             onChange={(format) => setEncode((e) => ({ ...e, format }))}

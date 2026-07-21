@@ -1,11 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
-import CheckCircle2 from 'lucide-react/dist/esm/icons/circle-check'
 import Images from 'lucide-react/dist/esm/icons/images'
-import Layers3 from 'lucide-react/dist/esm/icons/layers-3'
 import Loader2 from 'lucide-react/dist/esm/icons/loader-circle'
 import Package from 'lucide-react/dist/esm/icons/package'
-import TriangleAlert from 'lucide-react/dist/esm/icons/triangle-alert'
 import type { EncodeOptions } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
 import { compressionStats } from '#/lib/compress.ts'
@@ -88,27 +85,25 @@ function BatchPage() {
   }
 
   return (
-    <Container className="py-10 sm:py-12">
+    <Container className="py-7 sm:py-9">
       <PageIntro
         title="Process images in bulk"
+        command="comprimage batch"
         description="Apply one output setting to a group of images and download the finished files together as a ZIP."
-        className="mb-8"
+        className="mb-6"
       />
 
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-        <aside className="surface-subtle h-fit overflow-hidden lg:sticky lg:top-20">
-          <div className="border-border flex items-center justify-between border-b px-5 py-4">
-            <span className="text-foreground flex items-center gap-2 text-sm font-semibold">
-              <Layers3 className="text-brand size-4" aria-hidden />
-              Batch options
-            </span>
+      <div className="grid lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="border-border h-fit border p-5 lg:sticky lg:top-[72px] lg:border-r-0">
+          <div className="flex items-center justify-between">
+            <span className="terminal-label">[ batch options ]</span>
             {items.length > 0 && (
               <Button variant="ghost" size="sm" onClick={clear}>
                 Clear all
               </Button>
             )}
           </div>
-          <div className="flex flex-col gap-5 p-5">
+          <div className="mt-6 flex flex-col gap-5">
             <FormatSelect
               value={encode.format}
               onChange={(format) => setEncode((e) => ({ ...e, format }))}
@@ -134,11 +129,11 @@ function BatchPage() {
           </div>
         </aside>
 
-        <div className="flex min-w-0 flex-col gap-4">
-          <Dropzone multiple onImages={addSources} />
+        <div className="border-border flex min-w-0 flex-col border p-4 sm:p-5">
+          {items.length === 0 && <Dropzone multiple onImages={addSources} />}
 
           {items.length === 0 ? (
-            <div className="text-muted-foreground flex items-start gap-3 px-2 py-2 text-sm">
+            <div className="text-muted-foreground mt-4 flex items-start gap-3 px-2 py-2 text-sm">
               <Images
                 className="text-brand mt-0.5 size-5 shrink-0"
                 aria-hidden
@@ -150,35 +145,44 @@ function BatchPage() {
             </div>
           ) : (
             <>
+              <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-foreground text-lg font-semibold">
+                    Process images in bulk
+                  </h2>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    Queue updates as each local worker finishes.
+                  </p>
+                </div>
+                <Dropzone multiple compact onImages={addSources} />
+              </div>
+              <BatchList items={items} onRemove={remove} />
               <div
                 role="status"
-                className="surface-subtle flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 text-sm"
+                className="border-border mt-0 flex flex-wrap items-center gap-x-5 gap-y-2 border-x border-b px-4 py-3 text-xs"
               >
-                <span className="text-foreground inline-flex items-center gap-2 font-medium">
-                  <Layers3 className="text-brand size-4" aria-hidden />
-                  {doneCount} of {items.length} done
-                  {isProcessing && (
-                    <Loader2
-                      className="text-muted-foreground size-4 animate-spin"
-                      aria-hidden
-                    />
+                <span className="text-foreground mono">
+                  {items.length} files ·{' '}
+                  {formatBytes(
+                    items.reduce((sum, item) => sum + item.source.size, 0),
                   )}
+                  {doneCount > 0 && ` → ${formatBytes(totals.output)}`}
                 </span>
                 {totals.savings > 0 && (
-                  <span className="text-success inline-flex items-center gap-1.5 font-medium">
-                    <CheckCircle2 className="size-4" aria-hidden />
-                    Saved {formatBytes(totals.savings)} (
-                    {totals.savedPercent.toFixed(0)}%)
+                  <span className="text-success">
+                    · {totals.savedPercent.toFixed(0)}% smaller
+                  </span>
+                )}
+                {isProcessing && (
+                  <span className="text-muted-foreground inline-flex items-center gap-2">
+                    <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                    {doneCount} of {items.length} done
                   </span>
                 )}
                 {errorCount > 0 && (
-                  <span className="text-danger inline-flex items-center gap-1.5 font-medium">
-                    <TriangleAlert className="size-4" aria-hidden />
-                    {errorCount} failed
-                  </span>
+                  <span className="text-danger">· {errorCount} failed</span>
                 )}
               </div>
-              <BatchList items={items} onRemove={remove} />
             </>
           )}
         </div>

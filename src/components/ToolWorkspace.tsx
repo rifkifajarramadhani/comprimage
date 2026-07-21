@@ -1,4 +1,3 @@
-import FileImage from 'lucide-react/dist/esm/icons/file-image'
 import RotateCcw from 'lucide-react/dist/esm/icons/rotate-ccw'
 import TriangleAlert from 'lucide-react/dist/esm/icons/triangle-alert'
 import type { ProcessOptions } from '#/lib/process.ts'
@@ -6,7 +5,6 @@ import { useImageProcessor } from '#/hooks/use-image-processor.ts'
 import { useImageStore } from '#/stores/image-store.ts'
 import { formatBytes } from '#/lib/format.ts'
 import { Container } from '#/components/layout/Container.tsx'
-import { PageIntro } from '#/components/layout/PageIntro.tsx'
 import { Dropzone } from '#/components/upload/Dropzone.tsx'
 import { BeforeAfter } from '#/components/preview/BeforeAfter.tsx'
 import { Stats } from '#/components/statistics/Stats.tsx'
@@ -22,11 +20,13 @@ function sourceFormat(type: string): string {
 export function ToolWorkspace({
   title,
   description,
+  command,
   options,
   controls,
 }: {
   title: string
   description: string
+  command: string
   options: ProcessOptions
   controls: React.ReactNode
 }) {
@@ -36,20 +36,33 @@ export function ToolWorkspace({
   const { result, isProcessing, error } = useImageProcessor(source, options)
 
   return (
-    <Container className="py-10 sm:py-12">
-      <PageIntro title={title} description={description} className="mb-8" />
+    <Container className="py-7 sm:py-9">
+      <header className="border-border mb-6 flex flex-col gap-4 border-b pb-6 lg:flex-row lg:items-center lg:gap-10">
+        <h1 className="command-title shrink-0" aria-label={title}>
+          <span className="command-prompt" aria-hidden>
+            ${' '}
+          </span>
+          {command}
+          <span className="command-caret" aria-hidden />
+        </h1>
+        <p className="page-description max-w-2xl lg:border-l lg:border-border lg:pl-8">
+          {description}
+        </p>
+      </header>
 
       {!source ? (
         <div className="mx-auto max-w-4xl">
           <Dropzone onImage={setSource} />
         </div>
       ) : (
-        <div className="grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
-          <aside className="surface-subtle overflow-hidden lg:sticky lg:top-20">
-            <div className="border-border flex items-start gap-3 border-b p-5">
-              <span className="bg-brand-soft text-brand flex size-10 shrink-0 items-center justify-center rounded-lg">
-                <FileImage className="size-5" aria-hidden />
-              </span>
+        <div className="grid items-start lg:grid-cols-[320px_minmax(0,1fr)]">
+          <aside className="border-border overflow-hidden border lg:sticky lg:top-[72px] lg:border-r-0">
+            <div className="border-border flex items-start gap-3 border-b p-4">
+              <img
+                src={source.url}
+                alt=""
+                className="border-border size-12 shrink-0 rounded-sm border object-cover"
+              />
               <div className="min-w-0 flex-1">
                 <p
                   className="text-foreground truncate text-sm font-semibold"
@@ -57,14 +70,14 @@ export function ToolWorkspace({
                 >
                   {source.file.name}
                 </p>
-                <p className="text-muted-foreground mono mt-1 text-xs">
+                <p className="text-muted-foreground mono mt-1 text-[0.7rem] leading-5">
                   {source.width} × {source.height} · {sourceFormat(source.type)}{' '}
                   · {formatBytes(source.size)}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col gap-6 p-5">
+            <div className="flex flex-col gap-5 p-4">
               <Button
                 variant="outline"
                 className="w-full"
@@ -90,7 +103,7 @@ export function ToolWorkspace({
               {error && (
                 <div
                   role="alert"
-                  className="bg-danger-soft text-danger flex items-start gap-2 rounded-lg p-3 text-sm"
+                  className="bg-danger-soft text-danger flex items-start gap-2 rounded-sm border border-destructive/30 p-3 text-sm"
                 >
                   <TriangleAlert
                     className="mt-0.5 size-4 shrink-0"
@@ -102,11 +115,14 @@ export function ToolWorkspace({
             </div>
           </aside>
 
-          <div className="flex min-w-0 flex-col gap-4">
+          <div className="flex min-w-0 flex-col">
             {result ? (
               <Stats source={source} result={result} />
             ) : (
-              <div className="skeleton h-[74px] rounded-xl" aria-hidden />
+              <div
+                className="skeleton border-border h-[74px] border"
+                aria-hidden
+              />
             )}
             <BeforeAfter source={source} result={result} />
           </div>

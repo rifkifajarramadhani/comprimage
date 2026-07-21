@@ -27,17 +27,15 @@ function NavLink({
 }: {
   item: (typeof PRIMARY_NAV)[number] | (typeof SECONDARY_NAV)[number]
 }) {
-  const Icon = item.icon
   return (
     <Link
       to={item.to}
-      className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-10 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors"
+      className="text-muted-foreground hover:text-foreground relative flex h-14 items-center px-3 text-sm font-medium outline-none transition-colors after:absolute after:right-3 after:bottom-0 after:left-3 after:h-px after:origin-left after:scale-x-0 after:bg-primary after:transition-transform focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
       activeProps={{
         className:
-          'bg-brand-soft text-brand-ink flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold',
+          'text-brand relative flex h-14 items-center px-3 text-sm font-semibold outline-none after:absolute after:right-3 after:bottom-0 after:left-3 after:h-[2px] after:scale-x-100 after:bg-primary',
       }}
     >
-      <Icon className="size-4" aria-hidden />
       {item.label}
     </Link>
   )
@@ -45,34 +43,26 @@ function NavLink({
 
 export function SiteHeader() {
   return (
-    <header className="border-border bg-[var(--header-bg)] sticky top-0 z-20 h-16 border-b backdrop-blur-md">
-      <Container className="flex h-16 max-w-[1440px] items-center gap-4">
+    <header className="border-border bg-[var(--header-bg)] sticky top-0 z-20 h-14 border-b backdrop-blur-sm">
+      <Container className="flex h-14 items-center gap-5">
         <Link
           to="/"
-          className="text-foreground focus-visible:ring-ring flex shrink-0 items-center gap-2 rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-[3px]"
+          className="text-foreground flex shrink-0 items-center rounded-sm text-base font-bold tracking-[-0.04em] outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
           activeOptions={{ exact: true }}
         >
-          <img
-            src="/comprimage-mark.svg"
-            alt=""
-            width="36"
-            height="36"
-            className="size-9 shrink-0"
-            aria-hidden="true"
-          />
-          Comprimage
+          [comprimage]
         </Link>
 
         <nav
           aria-label="Image tools"
-          className="ml-4 hidden items-center gap-1 lg:flex"
+          className="ml-3 hidden items-center lg:flex"
         >
           {PRIMARY_NAV.map((item) => (
             <NavLink key={item.to} item={item} />
           ))}
         </nav>
 
-        <div className="ml-auto hidden items-center gap-1 lg:flex">
+        <div className="ml-auto hidden items-center lg:flex">
           {SECONDARY_NAV.map((item) => (
             <NavLink key={item.to} item={item} />
           ))}
@@ -93,20 +83,20 @@ export function SiteHeader() {
               <DropdownMenu.Content
                 align="end"
                 sideOffset={8}
-                className="border-border bg-popover text-popover-foreground z-40 min-w-56 rounded-xl border p-2 shadow-[var(--overlay-shadow)] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+                className="border-border bg-popover text-popover-foreground z-40 min-w-56 rounded-sm border p-1 shadow-[var(--overlay-shadow)] data-[state=open]:animate-in data-[state=open]:fade-in-0"
               >
                 <DropdownMenu.Group>
-                  <DropdownMenu.Label className="text-muted-foreground px-3 py-2 text-xs font-semibold">
-                    Image tools
+                  <DropdownMenu.Label className="terminal-label px-3 py-2">
+                    [ tools ]
                   </DropdownMenu.Label>
                   {PRIMARY_NAV.map(({ to, label, icon: Icon }) => (
                     <DropdownMenu.Item key={to} asChild>
                       <Link
                         to={to}
-                        className="text-muted-foreground focus:bg-secondary focus:text-foreground flex h-11 items-center gap-3 rounded-md px-3 text-sm outline-none"
+                        className="text-muted-foreground focus:bg-secondary focus:text-foreground flex h-11 items-center gap-3 rounded-sm px-3 text-sm outline-none"
                         activeProps={{
                           className:
-                            'bg-brand-soft text-brand-ink flex h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold outline-none',
+                            'bg-brand-soft text-brand-ink flex h-11 items-center gap-3 rounded-sm px-3 text-sm font-semibold outline-none',
                         }}
                       >
                         <Icon className="size-4" aria-hidden />
@@ -121,10 +111,10 @@ export function SiteHeader() {
                     <DropdownMenu.Item key={to} asChild>
                       <Link
                         to={to}
-                        className="text-muted-foreground focus:bg-secondary focus:text-foreground flex h-11 items-center gap-3 rounded-md px-3 text-sm outline-none"
+                        className="text-muted-foreground focus:bg-secondary focus:text-foreground flex h-11 items-center gap-3 rounded-sm px-3 text-sm outline-none"
                         activeProps={{
                           className:
-                            'bg-brand-soft text-brand-ink flex h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold outline-none',
+                            'bg-brand-soft text-brand-ink flex h-11 items-center gap-3 rounded-sm px-3 text-sm font-semibold outline-none',
                         }}
                       >
                         <Icon className="size-4" aria-hidden />

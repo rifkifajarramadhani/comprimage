@@ -11,7 +11,7 @@ export function PrivacyNote({
   return (
     <p
       className={cn(
-        'text-muted-foreground flex items-center gap-2 text-sm',
+        'text-success flex items-center gap-2 text-xs leading-5',
         className,
       )}
     >
@@ -20,7 +20,7 @@ export function PrivacyNote({
         className={cn('text-success shrink-0', compact ? 'size-3.5' : 'size-4')}
       />
       {compact
-        ? 'Processed locally. Nothing is uploaded.'
+        ? 'Processed on your device.'
         : 'Your images stay on this device from open to download.'}
     </p>
   )

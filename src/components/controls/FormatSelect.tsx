@@ -15,10 +15,14 @@ export function FormatSelect({
   value,
   onChange,
   label = 'Output format',
+  hideLabel = false,
+  id = 'format',
 }: {
   value: OutputFormat
   onChange: (format: OutputFormat) => void
   label?: string
+  hideLabel?: boolean
+  id?: string
 }) {
   // AVIF/JXL are WASM-only; hide them if WebAssembly is unavailable.
   const wasmOk = supportsWasmEncode()
@@ -26,9 +30,9 @@ export function FormatSelect({
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor="format">{label}</Label>
+      {!hideLabel && <Label htmlFor={id}>{label}</Label>}
       <Select value={value} onValueChange={(v) => onChange(v as OutputFormat)}>
-        <SelectTrigger id="format" className="w-full">
+        <SelectTrigger id={id} className="w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

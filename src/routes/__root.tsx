@@ -21,7 +21,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { name: 'theme-color', content: '#ffffff' },
+      { name: 'theme-color', content: '#fdfcfc' },
       {
         name: 'description',
         content:
@@ -48,17 +48,24 @@ function NotFoundPage() {
   return (
     <Container className="py-16 sm:py-24">
       <div className="mx-auto flex max-w-xl flex-col items-center text-center">
-        <span className="bg-brand-soft text-brand flex size-14 items-center justify-center rounded-xl">
+        <span className="border-border text-muted-foreground flex size-14 items-center justify-center rounded-sm border">
           <ImageOff className="size-7" aria-hidden />
         </span>
-        <h1 className="page-title mt-6">Page not found</h1>
+        <p className="terminal-label mt-6">[ error 404 ]</p>
+        <h1 className="command-title mt-4">
+          <span className="command-prompt" aria-hidden>
+            ${' '}
+          </span>
+          page not found
+          <span className="command-caret" aria-hidden />
+        </h1>
         <p className="page-description mt-4">
           That URL doesn&apos;t match anything here. Check the address or head
           back to the home page.
         </p>
         <Link
           to="/"
-          className="bg-primary text-primary-foreground mt-8 inline-flex h-11 items-center gap-2 rounded-md px-5 text-sm font-semibold shadow-[var(--control-shadow)]"
+          className="border-primary text-brand hover:bg-brand-soft mt-8 inline-flex h-11 items-center gap-2 rounded-sm border px-5 text-sm font-semibold"
         >
           <ArrowLeft className="size-4" aria-hidden />
           Back to home
@@ -71,7 +78,7 @@ function NotFoundPage() {
 // Runs before first paint: resolve the persisted theme (mirrored to a standalone
 // key by the settings store) and set the register class on <html> so there is no
 // dark→light flash on reload. Kept dependency-free — it can't import modules.
-const NO_FOUC_SCRIPT = `(function(){try{var p=localStorage.getItem('comprimage-theme')||'system';var d=p==='dark'||(p!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.remove('light','dark');c.add(d?'dark':'light');var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',d?'#151722':'#ffffff');}catch(e){}})();`
+const NO_FOUC_SCRIPT = `(function(){try{var p=localStorage.getItem('comprimage-theme')||'system';var d=p==='dark'||(p!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.remove('light','dark');c.add(d?'dark':'light');var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',d?'#171514':'#fdfcfc');}catch(e){}})();`
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (

@@ -38,12 +38,15 @@ function ResizePage() {
   return (
     <ToolWorkspace
       title="Resize images"
+      command="comprimage resize"
       description="Change dimensions while keeping the result crisp. Aspect ratio stays locked and upscaling is blocked by default."
       options={options}
       controls={
         <div className="grid gap-5">
+          <p className="terminal-label">[ resize ]</p>
           <ResizeControls options={resize} onChange={setResize} />
           <div className="border-border border-t" />
+          <p className="terminal-label">[ output ]</p>
           <FormatSelect
             value={encode.format}
             onChange={(format) => setEncode((e) => ({ ...e, format }))}

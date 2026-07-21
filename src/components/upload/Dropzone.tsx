@@ -16,6 +16,7 @@ export function Dropzone({
   onImage,
   onImages,
   multiple = false,
+  compact = false,
   className,
 }: {
   /** Single-image callback (default mode). */
@@ -23,6 +24,7 @@ export function Dropzone({
   /** Multi-image callback, used when `multiple` is set. */
   onImages?: (images: Array<SourceImage>) => void
   multiple?: boolean
+  compact?: boolean
   className?: string
 }) {
   const [error, setError] = useState<string | null>(null)
@@ -89,42 +91,64 @@ export function Dropzone({
         {...getRootProps()}
         aria-busy={busy}
         className={cn(
-          'group flex min-h-60 cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border border-dashed px-6 py-10 text-center transition-[background-color,border-color,box-shadow] duration-200 outline-none focus-within:ring-[3px] focus-within:ring-ring/30',
+          compact
+            ? 'group relative flex min-h-11 cursor-pointer items-center justify-center rounded-sm border px-4 text-center transition-[background-color,border-color,box-shadow] duration-150 outline-none focus-within:ring-2 focus-within:ring-ring/25'
+            : 'group relative flex min-h-64 cursor-pointer flex-col items-center justify-center gap-4 rounded-sm border border-dashed px-6 py-12 text-center transition-[background-color,border-color,box-shadow] duration-150 outline-none focus-within:ring-2 focus-within:ring-ring/25',
           isDragActive
             ? 'border-primary bg-brand-soft'
-            : 'border-input bg-surface-subtle hover:border-primary hover:bg-surface',
+            : 'border-input bg-background hover:border-primary hover:bg-surface',
         )}
       >
         <input {...getInputProps()} aria-label="Upload image" />
-        <span className="bg-brand-soft text-brand flex size-12 items-center justify-center rounded-lg">
-          {busy ? (
-            <Loader2 className="size-6 animate-spin" aria-hidden />
-          ) : (
-            <ImageUp className="size-6" aria-hidden />
-          )}
-        </span>
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-foreground text-base font-semibold">
-            {isDragActive
-              ? 'Drop images here'
-              : multiple
-                ? 'Drop images here'
-                : 'Drop an image here'}
-          </p>
-          {!isDragActive && (
-            <span className="bg-primary text-primary-foreground group-hover:bg-[var(--brand-hover)] inline-flex h-10 items-center gap-2 rounded-md px-4 text-sm font-semibold shadow-[var(--control-shadow)] transition-colors">
+        {!compact && (
+          <span className="terminal-label absolute top-4 left-4">
+            [ input ]
+          </span>
+        )}
+        {!compact && (
+          <span className="border-border text-muted-foreground flex size-11 items-center justify-center rounded-sm border">
+            {busy ? (
+              <Loader2 className="size-6 animate-spin" aria-hidden />
+            ) : (
+              <ImageUp className="size-6" aria-hidden />
+            )}
+          </span>
+        )}
+        {compact ? (
+          <span className="text-foreground inline-flex items-center gap-2 text-sm font-medium">
+            {busy ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
               <FolderOpen className="size-4" aria-hidden />
-              Browse files
-            </span>
-          )}
-          <p className="text-muted-foreground text-sm">
-            JPG, PNG, WebP, AVIF or GIF · up to 50 MB
-          </p>
-        </div>
-        <p className="text-muted-foreground flex items-center gap-2 text-xs">
-          <ShieldCheck className="text-success size-4" aria-hidden />
-          Processed on your device
-        </p>
+            )}
+            Add more images
+          </span>
+        ) : (
+          <>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-foreground text-sm font-semibold">
+                {isDragActive
+                  ? 'Drop images here'
+                  : multiple
+                    ? 'Drop images here'
+                    : 'Drop an image here'}
+              </p>
+              {!isDragActive && (
+                <span className="border-primary text-brand group-hover:bg-brand-soft group-hover:text-brand-ink inline-flex h-10 items-center gap-2 rounded-sm border bg-background px-4 text-sm font-semibold transition-colors">
+                  <FolderOpen className="size-4" aria-hidden />
+                  Browse files
+                </span>
+              )}
+              <p className="text-muted-foreground text-sm">
+                JPG, PNG, WebP, AVIF or GIF · up to 50 MB
+              </p>
+            </div>
+            <p className="text-success flex items-center gap-2 text-xs">
+              <ShieldCheck className="text-success size-4" aria-hidden />
+              Processed on your device
+            </p>
+          </>
+        )}
       </div>
       {error && (
         <p role="alert" className="text-danger text-sm">

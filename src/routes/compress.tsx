@@ -32,10 +32,12 @@ function CompressPage() {
   return (
     <ToolWorkspace
       title="Compress images"
+      command="comprimage compress"
       description="Reduce file size at the same dimensions and see the result update as you tune quality."
       options={options}
       controls={
         <div className="grid gap-5">
+          <p className="terminal-label">[ output ]</p>
           <FormatSelect
             value={encode.format}
             onChange={(format) => setEncode((e) => ({ ...e, format }))}

@@ -59,14 +59,15 @@ const DETAILS = [
 
 function AboutPage() {
   return (
-    <Container className="py-10 sm:py-12">
+    <Container className="py-7 sm:py-9">
       <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16">
         <div className="lg:sticky lg:top-24 lg:h-fit">
           <PageIntro
             title="Small files, without the mush"
+            command="comprimage explain"
             description="Comprimage pairs modern codecs with careful resizing so you can reduce image weight without giving up the detail that matters."
           />
-          <div className="bg-success-soft text-success mt-7 flex items-start gap-3 rounded-xl p-4 text-sm leading-6">
+          <div className="border-success/40 bg-success-soft text-success mt-7 flex items-start gap-3 rounded-sm border p-4 text-sm leading-6">
             <ShieldCheck className="mt-0.5 size-5 shrink-0" aria-hidden />
             <p>
               Every decode, resize, comparison, and encode happens on this
@@ -75,7 +76,7 @@ function AboutPage() {
           </div>
           <Link
             to="/compress"
-            className="bg-primary text-primary-foreground mt-7 inline-flex h-11 items-center gap-2 rounded-md px-5 text-sm font-semibold shadow-[var(--control-shadow)] hover:bg-[var(--brand-hover)]"
+            className="border-primary text-brand hover:bg-brand-soft mt-7 inline-flex h-11 items-center gap-2 rounded-sm border px-5 text-sm font-semibold"
           >
             Try it on an image
             <ArrowRight className="size-4" aria-hidden />
@@ -84,7 +85,7 @@ function AboutPage() {
 
         <div className="flex flex-col gap-12">
           <section>
-            <h2 className="section-title">A three-step local pipeline</h2>
+            <h2 className="terminal-label">[ a three-step local pipeline ]</h2>
             <p className="text-body-text mt-3 max-w-2xl leading-7">
               The order matters: decode faithfully, resize without a destructive
               jump, then encode for the chosen destination.
@@ -95,7 +96,7 @@ function AboutPage() {
                   key={title}
                   className="border-border grid gap-4 border-b py-6 last:border-b-0 sm:grid-cols-[48px_1fr]"
                 >
-                  <span className="bg-brand-soft text-brand flex size-11 items-center justify-center rounded-lg">
+                  <span className="border-border text-foreground flex size-11 items-center justify-center rounded-sm border">
                     <Icon className="size-5" aria-hidden />
                   </span>
                   <div>
@@ -112,7 +113,7 @@ function AboutPage() {
           </section>
 
           <section>
-            <h2 className="section-title">Why the result holds up</h2>
+            <h2 className="terminal-label">[ why the result holds up ]</h2>
             <div className="mt-6 grid gap-7 sm:grid-cols-2">
               {DETAILS.map(({ icon: Icon, title, body }, index) => (
                 <article
@@ -134,6 +135,7 @@ function AboutPage() {
           </section>
 
           <section className="surface-subtle p-5 sm:p-6">
+            <p className="terminal-label mb-4">[ formats and control ]</p>
             <h2 className="text-foreground font-semibold">
               Formats and control
             </h2>
