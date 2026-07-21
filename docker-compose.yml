@@ -29,7 +29,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=edge
-      - 'traefik.http.routers.comprimage.rule=Host(`comprimage.rifkiramadhani.my.id`)'
+      - 'traefik.http.routers.comprimage.rule=Host(`comprimage.my.id`)'
       - traefik.http.routers.comprimage.entrypoints=websecure
       - traefik.http.routers.comprimage.tls=true
       - traefik.http.routers.comprimage.tls.certresolver=letsencrypt

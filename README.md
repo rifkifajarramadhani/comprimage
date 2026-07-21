@@ -2,7 +2,7 @@
 
 Fast, privacy-first image toolkit. Resize, compress, and convert images entirely in your browser — images never leave your device. No uploads, no accounts, no waiting.
 
-Live at **https://comprimage.rifkiramadhani.my.id**
+Live at **https://comprimage.my.id**
 
 ## Features
 

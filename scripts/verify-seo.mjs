@@ -5,7 +5,7 @@ import { JSDOM } from 'jsdom'
 
 const root = resolve(import.meta.dirname, '..')
 const output = resolve(root, 'dist/client')
-const siteUrl = 'https://comprimage.rifkiramadhani.my.id'
+const siteUrl = 'https://comprimage.my.id'
 const socialImageUrl = `${siteUrl}/og/comprimage-social.png`
 const socialImageAlt =
   'Comprimage logo with the message “Private image tools. Nothing uploaded.” and a list of image tools'

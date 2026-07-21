@@ -50,7 +50,7 @@ const config = defineConfig({
       ],
       sitemap: {
         enabled: true,
-        host: 'https://comprimage.rifkiramadhani.my.id',
+        host: 'https://comprimage.my.id',
       },
     }),
     viteReact(),

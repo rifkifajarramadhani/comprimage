@@ -1,4 +1,4 @@
-export const SITE_URL = 'https://comprimage.rifkiramadhani.my.id'
+export const SITE_URL = 'https://comprimage.my.id'
 
 const SOCIAL_IMAGE_PATH = '/og/comprimage-social.png'
 const SOCIAL_IMAGE_ALT =
