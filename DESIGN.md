@@ -54,8 +54,10 @@ Tracked uppercase is reserved for compact bracketed terminal labels.
 ## Components
 
 - Header: compact 56px sticky bar with `[comprimage]`, primary tool navigation,
-  a thin active-route underline, and quiet
-  About/Settings actions. Mobile uses a portalled dropdown menu.
+  a thin active-route underline, quiet About/Settings actions, and a
+  three-segment theme switch (system/light/dark) that reuses the same active
+  underline. Mobile uses a portalled dropdown menu; the theme switch stays in the
+  bar at every width.
 - Button: primary, secondary, outline, ghost, destructive, and icon variants;
   every variant has hover, focus, active, disabled, and loading treatment.
 - Dropzone: a large dashed input surface with a visible browse action, file
@@ -63,7 +65,8 @@ Tracked uppercase is reserved for compact bracketed terminal labels.
 - Tool workspace: command intro, sticky 300–320px control rail, horizontal result
   summary, and one cohesive before/after preview with a draggable divider and
   synchronized zoom.
-- Settings: open grouped rows separated by hairlines, not stacked cards.
+- Settings: open grouped rows separated by hairlines, not stacked cards. Holds
+  configuration only — theme lives in the header, where it is one click away.
 - Batch: controls rail plus queue list; aggregate progress and download remain
   visible while results exist.
 - Feedback: skeletons for processing, icon plus text for semantic state, and

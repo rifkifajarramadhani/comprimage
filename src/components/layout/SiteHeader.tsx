@@ -8,6 +8,7 @@ import Menu from 'lucide-react/dist/esm/icons/menu'
 import Repeat2 from 'lucide-react/dist/esm/icons/repeat-2'
 import Settings from 'lucide-react/dist/esm/icons/settings'
 import { Container } from './Container.tsx'
+import { ThemeSwitch } from './ThemeSwitch.tsx'
 import { Button } from '#/components/ui/button.tsx'
 
 const PRIMARY_NAV = [
@@ -66,9 +67,12 @@ export function SiteHeader() {
           {SECONDARY_NAV.map((item) => (
             <NavLink key={item.to} item={item} />
           ))}
+          <span className="bg-border mx-3 h-5 w-px" aria-hidden />
+          <ThemeSwitch />
         </div>
 
         <div className="ml-auto flex items-center gap-2 lg:hidden">
+          <ThemeSwitch />
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <Button

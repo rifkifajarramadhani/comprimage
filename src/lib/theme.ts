@@ -3,6 +3,14 @@ import type { ThemePreference } from '#/lib/settings.ts'
 /** localStorage key mirrored by the no-FOUC inline script in __root.tsx. */
 export const THEME_STORAGE_KEY = 'comprimage-theme'
 
+/**
+ * Attribute on <html> carrying the raw preference (not the resolved register).
+ * Set by the no-FOUC script before paint and kept current by `applyTheme`, so
+ * the header theme switch can mark its active segment in CSS — correct on the
+ * first frame, before React hydrates. Also mirrored in styles.css.
+ */
+export const THEME_PREF_ATTR = 'data-theme-pref'
+
 export type ResolvedTheme = 'light' | 'dark'
 
 /** theme-color meta content per register (matches styles.css canvas). */
@@ -41,8 +49,9 @@ export function resolveTheme(pref: ThemePreference): ResolvedTheme {
 
 /**
  * Apply a theme preference to the document: sets the `light`/`dark` class on
- * <html> (shadcn's `dark:` variants key off `.dark`) and syncs the theme-color
- * meta tag. Safe to call on the server (no-ops without `document`).
+ * <html> (shadcn's `dark:` variants key off `.dark`), records the preference
+ * itself in `data-theme-pref`, and syncs the theme-color meta tag. Safe to call
+ * on the server (no-ops without `document`).
  */
 export function applyTheme(pref: ThemePreference): ResolvedTheme {
   const resolved = resolveTheme(pref)
@@ -51,6 +60,7 @@ export function applyTheme(pref: ThemePreference): ResolvedTheme {
   const root = document.documentElement
   root.classList.remove('light', 'dark')
   root.classList.add(resolved)
+  root.setAttribute(THEME_PREF_ATTR, pref)
 
   // The document ships two media-scoped theme-color tags so the static HTML is
   // correct before any script runs. Once we know the resolved register, collapse

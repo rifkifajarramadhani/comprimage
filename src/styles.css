@@ -251,6 +251,82 @@ select {
   text-transform: uppercase;
 }
 
+/* Header theme switch. The active segment is selected on `data-theme-pref`
+   (set on <html> before paint by the no-FOUC script in __root.tsx, kept current
+   by applyTheme) rather than from React state, so it is correct on the first
+   frame of a prerendered page. Keep the attribute name in sync with
+   THEME_PREF_ATTR in lib/theme.ts. */
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 0.25rem;
+}
+
+.theme-switch [data-pref] {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--muted-ink);
+  cursor: pointer;
+  transition:
+    color 150ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 768px) {
+  .theme-switch [data-pref] {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+.theme-switch [data-pref]:hover {
+  background: var(--surface-raised);
+  color: var(--ink);
+}
+
+.theme-switch [data-pref]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+/* Active marker: the same brand underline the header uses for the active route. */
+.theme-switch [data-pref]::after {
+  content: '';
+  position: absolute;
+  right: 0.375rem;
+  bottom: 0.25rem;
+  left: 0.375rem;
+  height: 2px;
+  background: var(--brand);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The final arm is the no-JS fallback: without the inline script the attribute
+   is never set, and `system` — which is what the OS media query is doing — is
+   the honest answer. */
+:root[data-theme-pref='system'] .theme-switch [data-pref='system'],
+:root[data-theme-pref='light'] .theme-switch [data-pref='light'],
+:root[data-theme-pref='dark'] .theme-switch [data-pref='dark'],
+:root:not([data-theme-pref]) .theme-switch [data-pref='system'] {
+  color: var(--brand);
+}
+
+:root[data-theme-pref='system'] .theme-switch [data-pref='system']::after,
+:root[data-theme-pref='light'] .theme-switch [data-pref='light']::after,
+:root[data-theme-pref='dark'] .theme-switch [data-pref='dark']::after,
+:root:not([data-theme-pref]) .theme-switch [data-pref='system']::after {
+  transform: scaleX(1);
+}
+
 .command-title {
   color: var(--ink);
   font-size: clamp(1.75rem, 4vw, 2.75rem);

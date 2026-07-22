@@ -91,8 +91,11 @@ function NotFoundPage() {
 
 // Runs before first paint: resolve the persisted theme (mirrored to a standalone
 // key by the settings store) and set the register class on <html> so there is no
-// dark→light flash on reload. Kept dependency-free — it can't import modules.
-const NO_FOUC_SCRIPT = `(function(){try{var p=localStorage.getItem('comprimage-theme')||'system';var d=p==='dark'||(p!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.remove('light','dark');c.add(d?'dark':'light');var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++){m[i].removeAttribute('media');m[i].setAttribute('content',d?'#171514':'#fdfcfc');}}catch(e){}})();`
+// dark→light flash on reload. It also records the raw preference in
+// `data-theme-pref`, which is what marks the active segment of the header theme
+// switch in CSS — so that segment is right on the first frame too, without
+// waiting for hydration. Kept dependency-free — it can't import modules.
+const NO_FOUC_SCRIPT = `(function(){try{var p=localStorage.getItem('comprimage-theme');if(p!=='light'&&p!=='dark')p='system';var d=p==='dark'||(p!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var r=document.documentElement;var c=r.classList;c.remove('light','dark');c.add(d?'dark':'light');r.setAttribute('data-theme-pref',p);var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++){m[i].removeAttribute('media');m[i].setAttribute('content',d?'#171514':'#fdfcfc');}}catch(e){}})();`
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
