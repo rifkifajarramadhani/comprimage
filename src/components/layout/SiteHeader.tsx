@@ -1,27 +1,13 @@
 import { Link } from '@tanstack/react-router'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import FileDown from 'lucide-react/dist/esm/icons/file-down'
-import Info from 'lucide-react/dist/esm/icons/info'
-import Layers3 from 'lucide-react/dist/esm/icons/layers-3'
-import Maximize2 from 'lucide-react/dist/esm/icons/maximize-2'
+import { lazy, Suspense, useState } from 'react'
 import Menu from 'lucide-react/dist/esm/icons/menu'
-import Repeat2 from 'lucide-react/dist/esm/icons/repeat-2'
-import Settings from 'lucide-react/dist/esm/icons/settings'
 import { Container } from './Container.tsx'
 import { ThemeSwitch } from './ThemeSwitch.tsx'
+import { PRIMARY_NAV, SECONDARY_NAV } from './navigation.ts'
 import { Button } from '#/components/ui/button.tsx'
 
-const PRIMARY_NAV = [
-  { to: '/resize', label: 'Resize', icon: Maximize2 },
-  { to: '/compress', label: 'Compress', icon: FileDown },
-  { to: '/convert', label: 'Convert', icon: Repeat2 },
-  { to: '/batch', label: 'Batch', icon: Layers3 },
-] as const
-
-const SECONDARY_NAV = [
-  { to: '/about', label: 'About', icon: Info },
-  { to: '/settings', label: 'Settings', icon: Settings },
-] as const
+// Keep the menu and its positioning code out of the initial page assets.
+const MobileNavigation = lazy(() => import('./MobileNavigation.tsx'))
 
 function NavLink({
   item,
@@ -43,6 +29,31 @@ function NavLink({
 }
 
 export function SiteHeader() {
+  const [menuRequest, setMenuRequest] = useState<'pointer' | 'keyboard' | null>(
+    null,
+  )
+  const menuTrigger = (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label="Open navigation menu"
+      aria-haspopup="menu"
+      aria-expanded={false}
+      aria-busy={menuRequest !== null}
+      onClick={(event) =>
+        setMenuRequest(event.detail === 0 ? 'keyboard' : 'pointer')
+      }
+      onKeyDown={(event) => {
+        if (event.key === 'ArrowDown') {
+          event.preventDefault()
+          setMenuRequest('keyboard')
+        }
+      }}
+    >
+      <Menu aria-hidden />
+    </Button>
+  )
+
   return (
     <header className="border-border bg-[var(--header-bg)] sticky top-0 z-20 h-14 border-b backdrop-blur-sm">
       <Container className="flex h-14 items-center gap-5">
@@ -73,63 +84,13 @@ export function SiteHeader() {
 
         <div className="ml-auto flex items-center gap-2 lg:hidden">
           <ThemeSwitch />
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Open navigation menu"
-              >
-                <Menu aria-hidden />
-              </Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content
-                align="end"
-                sideOffset={8}
-                className="border-border bg-popover text-popover-foreground z-40 min-w-56 rounded-sm border p-1 shadow-[var(--overlay-shadow)] data-[state=open]:animate-in data-[state=open]:fade-in-0"
-              >
-                <DropdownMenu.Group>
-                  <DropdownMenu.Label className="terminal-label px-3 py-2">
-                    [ tools ]
-                  </DropdownMenu.Label>
-                  {PRIMARY_NAV.map(({ to, label, icon: Icon }) => (
-                    <DropdownMenu.Item key={to} asChild>
-                      <Link
-                        to={to}
-                        className="text-muted-foreground focus:bg-secondary focus:text-foreground flex h-11 items-center gap-3 rounded-sm px-3 text-sm outline-none"
-                        activeProps={{
-                          className:
-                            'bg-brand-soft text-brand-ink flex h-11 items-center gap-3 rounded-sm px-3 text-sm font-semibold outline-none',
-                        }}
-                      >
-                        <Icon className="size-4" aria-hidden />
-                        {label}
-                      </Link>
-                    </DropdownMenu.Item>
-                  ))}
-                </DropdownMenu.Group>
-                <DropdownMenu.Separator className="bg-border my-2 h-px" />
-                <DropdownMenu.Group>
-                  {SECONDARY_NAV.map(({ to, label, icon: Icon }) => (
-                    <DropdownMenu.Item key={to} asChild>
-                      <Link
-                        to={to}
-                        className="text-muted-foreground focus:bg-secondary focus:text-foreground flex h-11 items-center gap-3 rounded-sm px-3 text-sm outline-none"
-                        activeProps={{
-                          className:
-                            'bg-brand-soft text-brand-ink flex h-11 items-center gap-3 rounded-sm px-3 text-sm font-semibold outline-none',
-                        }}
-                      >
-                        <Icon className="size-4" aria-hidden />
-                        {label}
-                      </Link>
-                    </DropdownMenu.Item>
-                  ))}
-                </DropdownMenu.Group>
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+          {menuRequest !== null ? (
+            <Suspense fallback={menuTrigger}>
+              <MobileNavigation focusFirstItem={menuRequest === 'keyboard'} />
+            </Suspense>
+          ) : (
+            menuTrigger
+          )}
         </div>
       </Container>
     </header>
