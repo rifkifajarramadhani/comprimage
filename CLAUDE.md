@@ -19,6 +19,34 @@ bun run generate-routes  # tsr generate — regenerate routeTree.gen.ts
 
 Run a single test: `bunx vitest run src/lib/resize.test.ts` (or `bunx vitest -t "name"`). Tests are `*.test.ts` colocated in `src/lib`, run under jsdom.
 
+## Commit workflow
+
+Follow the full [checkpoint commit workflow](AGENTS.md#checkpoint-commit-workflow)
+in [AGENTS.md](AGENTS.md), the repository-wide engineering guide.
+
+- This is the user's standing request to commit. Commit each checkpoint as soon
+  as its focused checks pass, without asking or waiting until the task is done.
+  Follow any explicit user instruction to defer or skip commits. Create a branch
+  before committing on `main` unless the user explicitly asks otherwise. This
+  workflow does not authorize pushing, force-pushing, or rewriting published
+  history.
+- Before editing, list small, independently reviewable checkpoints in the plan
+  or todo list, each with its intended `type(scope): summary` commit subject.
+  A simple change can have one checkpoint and one commit.
+- Implement one checkpoint with its tests and documentation, run focused checks,
+  stage only its files or hunks, and run `git commit` before starting the next
+  checkpoint. Preserve unrelated user changes. Never batch checkpoints into a
+  final commit, amend earlier checkpoints to include later work, or bypass hooks
+  with `--no-verify`.
+- For code checkpoints, run affected Vitest tests, ESLint on touched code, and
+  Prettier on touched files. For documentation only, run Prettier on the changed
+  docs and review the diff. Check the rendered UI for behavior or layout changes.
+  Run the full `bun run test`, `bun run lint`, and `bun run check` before
+  submitting, and commit any resulting fixes separately.
+- A checkpoint is complete only after it is committed. Update any matching task
+  checkbox or status in that commit. Before the final reply, confirm your
+  changes are committed with `git status` and list the commits you created.
+
 ## Architecture
 
 100% client-side static SPA — no backend, no database. Images never leave the browser.
