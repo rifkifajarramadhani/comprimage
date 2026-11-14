@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # --- dependencies: install once, shared by dev + build stages ---
-FROM oven/bun:1 AS dependencies
+FROM oven/bun:1.4 AS dependencies
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile

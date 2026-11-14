@@ -72,7 +72,7 @@ flowchart LR
 
 ## Getting started
 
-Requires [Bun](https://bun.sh/).
+Requires [Bun](https://bun.sh/) 1.4 or newer. `bun.lock` is the authoritative lockfile. Its version 3 format supports scoped dependency overrides and cannot be read by older Bun versions.
 
 ```bash
 bun install
