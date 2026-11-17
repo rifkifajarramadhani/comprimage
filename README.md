@@ -119,3 +119,19 @@ Validate a local production container with `docker exec <container> nginx -t` an
 ### CI
 
 On push to `main`, [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds the Docker image, pushes it to GHCR (`ghcr.io/rifkifajarramadhani/comprimage`), and SSH-deploys to the production host.
+
+The build generates `dist/nginx/security-headers.conf` outside `dist/client` by
+hashing inline scripts in every emitted HTML document, including hydration and
+error documents. The Docker image installs this nginx include and uses
+`add_header_inherit merge` plus `always` to retain security headers in nested
+locations and on errors. Rebuild when HTML changes; never edit deployed HTML
+without regenerating the hashes.
+
+For local CSP compatibility checks, run `bun scripts/security-headers.mjs
+--report-only`, install the generated include into a local container serving the
+same build, and reload nginx. Exercise themes, navigation, image previews, all
+output formats, batch processing, and downloads while monitoring browser CSP
+violations. Run the generator without that flag to restore enforcement, reload,
+and repeat. `CSP_HEADER=content-security-policy bun scripts/verify-nginx.mjs`
+also verifies headers on successful, redirect, asset, conditional, and error
+responses. Use `content-security-policy-report-only` during the first pass.

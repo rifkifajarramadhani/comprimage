@@ -28,6 +28,8 @@ Recommendation: upgrade the production base to `nginx:1.30.6-alpine`, the target
 
 ### SEC-002: Browser security headers are missing
 
+Local implementation: the postbuild generator in `scripts/security-headers.mjs` scans all emitted HTML and writes a private nginx include. All 28 executable inline scripts across nine built documents are covered by ten unique hashes. The policy restricts scripts, workers, connections, images, fonts, framing, objects, forms, and base URLs. Only WASM evaluation is permitted. Required React styles and the small Vite-inlined font subset are allowed. nginx merges inherited headers and sends them with `always`. Generator tests, HTTP header checks, and Chromium exercises passed in report-only and enforced modes for themes, navigation, previews, five output codecs, downloads, and batch ZIPs. Direct document checks found no CSP violations; `/settings` has an existing React hydration warning when server/client hardware concurrency differs. Production edge/header verification remains pending.
+
 Rule references: `REACT-CSP-001` and `JS-CSP-001`.
 
 Evidence: the server block at [comprimage.conf:4](docker/nginx/comprimage.conf#L4) sets no CSP, framing restriction, `X-Content-Type-Options`, or explicit referrer policy. The sampled production response also omitted `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, and `Referrer-Policy`. This confirms the observation for that response, not every edge response or route.

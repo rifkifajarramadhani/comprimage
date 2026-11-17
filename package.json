@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "build": "vite build && bun scripts/verify-seo.mjs",
+    "build": "vite build && bun scripts/verify-seo.mjs && bun scripts/security-headers.mjs",
     "verify-seo": "bun scripts/verify-seo.mjs",
     "preview": "vite preview",
     "test": "vitest run",

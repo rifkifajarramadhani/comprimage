@@ -23,6 +23,7 @@ RUN bun run build
 # --- production: serve the static output with nginx ---
 FROM nginx:1.30.6-alpine AS production
 COPY --from=build /app/dist/client /usr/share/nginx/html
+COPY --from=build /app/dist/nginx/security-headers.conf /etc/nginx/security-headers.conf
 COPY docker/nginx/comprimage.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 # nginx:alpine's default CMD runs nginx in the foreground.
