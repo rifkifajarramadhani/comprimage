@@ -49,6 +49,8 @@ The [CSP script-src reference](https://developer.mozilla.org/en-US/docs/Web/HTTP
 
 ### SEC-003: Deployment does not verify the SSH host fingerprint
 
+Local implementation: `.github/workflows/deploy.yml` rejects missing or malformed `SSH_HOST_FINGERPRINT` values before starting SSH and passes the secret to the action. README documents trusted fingerprint collection and rotation. An isolated local OpenSSH server and the action's drone-ssh 1.8.2 client accepted the correct fingerprint and rejected an incorrect fingerprint; the workflow guard rejected missing, malformed, and newline-containing values. GitHub secret configuration and production deployment remain pending.
+
 Evidence: the SSH action at [deploy.yml:40](.github/workflows/deploy.yml#L40) receives `host`, `username`, and `key`, but no `fingerprint` input.
 
 Impact: a network attacker who can redirect the SSH connection could impersonate the deployment host, receive the deployment command, and falsely report success. Private-key authentication identifies the client; it does not by itself establish that the client reached the intended server. This finding does not imply that the private key is transmitted to the server or has leaked.

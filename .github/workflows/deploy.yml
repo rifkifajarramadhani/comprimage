@@ -37,9 +37,20 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Require a trusted SSH host fingerprint
+        env:
+          SSH_HOST_FINGERPRINT: ${{ secrets.SSH_HOST_FINGERPRINT }}
+        shell: bash
+        run: |
+          if [[ ! "$SSH_HOST_FINGERPRINT" =~ ^SHA256:[A-Za-z0-9+/]{43}$ ]]; then
+            echo "::error::Configure SSH_HOST_FINGERPRINT with a trusted SHA256 host fingerprint."
+            exit 1
+          fi
+
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          fingerprint: ${{ secrets.SSH_HOST_FINGERPRINT }}
           script: ~/deploy-comprimage.sh ${{ github.sha }}

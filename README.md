@@ -135,3 +135,19 @@ violations. Run the generator without that flag to restore enforcement, reload,
 and repeat. `CSP_HEADER=content-security-policy bun scripts/verify-nginx.mjs`
 also verifies headers on successful, redirect, asset, conditional, and error
 responses. Use `content-security-policy-report-only` during the first pass.
+
+Deployment requires `SSH_HOST_FINGERPRINT` alongside `SSH_HOST`, `SSH_USER`,
+and `SSH_KEY` in GitHub Actions secrets. In the provider's authenticated console,
+or through an already verified administrative SSH session, run:
+
+```bash
+ssh-keygen -l -E sha256 -f /etc/ssh/ssh_host_ed25519_key.pub
+```
+
+Store the `SHA256:...` field exactly, without the key size or comment. Verify the
+host key type actually presented by the deployment server. The workflow rejects
+missing or malformed fingerprints before the SSH action starts, and the action
+rejects a fingerprint mismatch. Do not establish trust using `ssh-keyscan` over
+an unverified connection. Obtain a rotated fingerprint through the trusted
+channel before updating the secret. Configuring production secrets and deploying
+remain operational steps outside these local changes.
