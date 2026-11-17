@@ -93,7 +93,7 @@ Comprimage is a **100% client-side application with prerendered static HTML** (n
 
 Files:
 
-- `Dockerfile` — shared `dependencies` stage (`bun install --frozen-lockfile`) fanning out to a `development` stage (Vite dev server) and a `build` → `production` stage (`bun run build` → `nginx:1.27-alpine` serving `dist/client`)
+- `Dockerfile` — shared `dependencies` stage (`bun install --frozen-lockfile`) fanning out to a `development` stage (Vite dev server) and a `build` → `production` stage (`bun run build` → `nginx:1.30.6-alpine` serving `dist/client`)
 - `docker/nginx/comprimage.conf` — clean prerendered route serving, real document/asset 404s, `no-cache` headers for branding assets, and long-lived caching for hashed `/assets`
 - `docker-compose.yml` — two Compose profiles: `web-dev` (`--profile dev`) and `web-prod` (`--profile prod`, on the external `edge` network)
 - `.env.example` — copy to `.env` to override `FRONTEND_DEV_PORT` (dev host port) and `IMAGE_TAG` (prod image)
@@ -113,6 +113,8 @@ docker compose --profile prod up -d --build
 TLS and routing are handled by the shared **Traefik** edge proxy (Let's Encrypt). The `web-prod` container joins the `edge` Docker network and publishes **no** host ports; routing is configured via Traefik labels on the `web-prod` service in `docker-compose.yml`.
 
 > `vite.config.ts` pins the prerender preview server to `127.0.0.1` so the build's prerender step is reliable inside containers.
+
+Validate a local production container with `docker exec <container> nginx -t` and `NGINX_ORIGIN=http://127.0.0.1:8088 bun scripts/verify-nginx.mjs`. The verifier expects the matching build assets under `dist/client/assets`; set `NGINX_ASSETS_DIR` when testing assets copied from a container. It checks health, routes, redirects, missing files, cache revalidation, and codec MIME types.
 
 ### CI
 

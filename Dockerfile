@@ -21,7 +21,7 @@ COPY . .
 RUN bun run build
 
 # --- production: serve the static output with nginx ---
-FROM nginx:1.27-alpine AS production
+FROM nginx:1.30.6-alpine AS production
 COPY --from=build /app/dist/client /usr/share/nginx/html
 COPY docker/nginx/comprimage.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80

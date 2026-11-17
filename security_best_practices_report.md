@@ -18,6 +18,8 @@ The review covers application input handling, worker availability, nginx and Com
 
 ### SEC-001: Production nginx is outdated
 
+Local implementation: upgraded the production base to `nginx:1.30.6-alpine`. The image pulled successfully and the upstream stable release was rechecked on 2026-11-17. A local production Docker build, `nginx -t`, and `scripts/verify-nginx.mjs` passed for health, all seven routes, redirects, cache and conditional responses, missing resources, and WASM/font/JS/CSS MIME types. Production rollout and version verification remain pending.
+
 Evidence: [Dockerfile:24](Dockerfile#L24) selects `FROM nginx:1.27-alpine AS production`. An ordinary production GET returned HTTP 200 with `server: nginx/1.27.5` on 2026-11-16. A server header is supporting evidence, not a container inventory.
 
 Impact: several published nginx advisory ranges include 1.27.5. Exposure depends on enabled modules and configuration, so the version match alone does not establish an exploitable path. The checked configuration serves static files on port 80 behind Traefik; advisories requiring nginx TLS termination, HTTP/3, or unused modules need separate applicability checks. No working exploit was established. See the [nginx security advisories](https://nginx.org/en/security_advisories.html).
