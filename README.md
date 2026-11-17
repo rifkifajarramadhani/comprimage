@@ -55,7 +55,7 @@ comprimage/
 
 ## How it works
 
-Users drop or select images via a shared dropzone. The source image is held in a Zustand store so it carries across the resize, compress, and convert tools. Each tool builds `ProcessOptions` from its controls and hands them to a shared `ToolWorkspace`, which drives processing through an `ImagePool` of Web Workers.
+Users drop or select images via a shared dropzone. Imports inspect metadata before decoding and accept at most 50 MiB and 25 megapixels per image. Batch mode holds up to 50 loaded images and 100 megapixels across repeated additions, reads at most two images at once, preserves selection order, and reports skipped files individually. Imports can be cancelled; unclaimed previews are released. Resized output is also limited to 25 megapixels before allocating a canvas. The source image is held in a Zustand store so it carries across the resize, compress, and convert tools. Each tool builds `ProcessOptions` from its controls and hands them to a shared `ToolWorkspace`, which drives processing through an `ImagePool` of Web Workers.
 
 The pipeline is **decode → (optional resize) → encode → Blob**, implemented in `src/lib/process.ts`. Object URLs are minted on the main thread (blob URLs created inside a worker are not reliably usable from the document). When Web Workers or OffscreenCanvas are unavailable, processing falls back to the main thread.
 

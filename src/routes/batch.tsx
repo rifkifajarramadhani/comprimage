@@ -28,7 +28,7 @@ import type { FaqEntry } from '#/lib/seo.ts'
 const STEPS = [
   {
     title: 'Add the whole set at once',
-    body: 'Drop in or select as many images as you need — JPG, PNG, WebP, AVIF, and GIF are accepted, up to 50 MB each. There is no file-count limit, because there is no upload and no server-side queue to wait in.',
+    body: 'Select JPG, PNG, WebP, AVIF, or GIF files, up to 50 MiB and 25 megapixels each. A batch holds up to 50 loaded images and 100 megapixels in total, including later additions. Valid images stay in selection order; skipped files show a reason.',
   },
   {
     title: 'Set the output once, apply it to everything',
@@ -63,12 +63,12 @@ const FAQ: Array<FaqEntry> = [
   {
     question: 'How many images can I process at once?',
     answer:
-      'There is no fixed limit on the number of files, only on their individual size, which is capped at 50 MB. Because processing happens on your own machine, the practical ceiling for a very large batch is your available memory.',
+      'Keep up to 50 images loaded at once, with a total of 100 megapixels. Each image must fit within 25 megapixels and 50 MiB. Imports read at most two images at a time. Remove images or clear the batch to make room for more.',
   },
   {
     question: 'Are batch-processed images uploaded to a server?',
     answer:
-      'No. Every image in the batch is decoded, re-encoded, and packaged into the ZIP entirely inside your browser. Nothing is transmitted, so there is no size quota and no waiting in a queue behind other users.',
+      'No. Every image in the batch is decoded, re-encoded, and packaged into the ZIP entirely inside your browser. Nothing is transmitted, so there is no waiting behind other users. Local limits keep memory use bounded.',
   },
   {
     question: 'Can I apply different settings to different images?',
@@ -191,7 +191,36 @@ function BatchPage() {
         </aside>
 
         <div className="border-border flex min-w-0 flex-col border p-4 sm:p-5">
-          {items.length === 0 && <Dropzone multiple onImages={addSources} />}
+          <div
+            className={
+              items.length > 0
+                ? 'mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'
+                : undefined
+            }
+          >
+            {items.length > 0 && (
+              <div>
+                <h2 className="text-foreground text-lg font-semibold">
+                  Process images in bulk
+                </h2>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Queue updates as each local worker finishes.
+                </p>
+              </div>
+            )}
+            <Dropzone
+              multiple
+              compact={items.length > 0}
+              onImages={addSources}
+              existingUsage={{
+                count: items.length,
+                pixels: items.reduce(
+                  (sum, item) => sum + item.source.width * item.source.height,
+                  0,
+                ),
+              }}
+            />
+          </div>
 
           {items.length === 0 ? (
             <div className="text-muted-foreground mt-4 flex items-start gap-3 px-2 py-2 text-sm">
@@ -206,17 +235,6 @@ function BatchPage() {
             </div>
           ) : (
             <>
-              <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-foreground text-lg font-semibold">
-                    Process images in bulk
-                  </h2>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    Queue updates as each local worker finishes.
-                  </p>
-                </div>
-                <Dropzone multiple compact onImages={addSources} />
-              </div>
               <BatchList items={items} onRemove={remove} />
               <div
                 role="status"

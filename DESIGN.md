@@ -61,7 +61,7 @@ Tracked uppercase is reserved for compact bracketed terminal labels.
 - Button: primary, secondary, outline, ghost, destructive, and icon variants;
   every variant has hover, focus, active, disabled, and loading treatment.
 - Dropzone: a large dashed input surface with a visible browse action, file
-  constraints, local-processing assurance, busy state, and inline error.
+  constraints, local-processing assurance, busy state, cancellation, and per-file rejection reasons. Keep valid files when others fail; lock selection until an import and its cleanup finish. Batch limits include previously loaded images.
 - Tool workspace: command intro, sticky 300–320px control rail, horizontal result
   summary, and one cohesive before/after preview with a draggable divider and
   synchronized zoom.

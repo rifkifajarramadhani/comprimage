@@ -14,7 +14,7 @@ import type { FaqEntry } from '#/lib/seo.ts'
 const STEPS = [
   {
     title: 'Drop an image into the browser',
-    body: 'JPG, PNG, WebP, AVIF, and GIF are accepted, up to 50 MB per file. The file is read straight from disk into the page — there is no upload step and no server involved at any point.',
+    body: 'JPG, PNG, WebP, AVIF, and GIF are accepted, up to 50 MiB and 25 megapixels per image. The file is read straight from disk into the page — there is no upload step and no server involved at any point.',
   },
   {
     title: 'Choose how the new size is measured',
@@ -64,7 +64,7 @@ const FAQ: Array<FaqEntry> = [
   {
     question: 'What is the largest file I can resize?',
     answer:
-      'Files up to 50 MB each. Because processing runs on your own machine, very large images are limited by your available memory rather than by any upload quota.',
+      'Input files can be up to 50 MiB and 25 megapixels each. Resized output must also stay within 25 megapixels. These limits apply locally before allocating output canvases.',
   },
 ]
 

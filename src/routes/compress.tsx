@@ -13,7 +13,7 @@ import type { FaqEntry } from '#/lib/seo.ts'
 const STEPS = [
   {
     title: 'Drop in the image you want to shrink',
-    body: 'JPG, PNG, WebP, AVIF, and GIF are accepted, up to 50 MB per file. Dimensions are left untouched — compressing only changes how those pixels are stored.',
+    body: 'JPG, PNG, WebP, AVIF, and GIF are accepted, up to 50 MiB and 25 megapixels per image. Dimensions are left untouched — compressing only changes how those pixels are stored.',
   },
   {
     title: 'Pick a format and a quality level',

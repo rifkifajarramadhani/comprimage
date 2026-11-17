@@ -13,7 +13,7 @@ import type { FaqEntry } from '#/lib/seo.ts'
 const STEPS = [
   {
     title: 'Drop in the source image',
-    body: 'JPG, PNG, WebP, AVIF, and GIF are all accepted as input, up to 50 MB per file. The browser decodes it to raw pixels locally — no upload, no queue, no account.',
+    body: 'JPG, PNG, WebP, AVIF, and GIF are all accepted as input, up to 50 MiB and 25 megapixels per image. The browser decodes it to raw pixels locally — no upload, no queue, no account.',
   },
   {
     title: 'Choose the target format',

@@ -1,6 +1,7 @@
 import type { OutputFormat } from '#/types/image.ts'
 import type { Dimensions } from './resize.ts'
 import { resizeSteps } from './resize.ts'
+import { assertImageDimensions } from './image-limits.ts'
 
 /** Decode a File/Blob into an ImageBitmap (fast, off-main-thread capable). */
 export async function decode(source: Blob): Promise<ImageBitmap> {
@@ -41,6 +42,8 @@ export function drawToCanvas(
   bitmap: ImageBitmap,
   target: Dimensions,
 ): AnyCanvas {
+  assertImageDimensions(target.width, target.height)
+  assertImageDimensions(bitmap.width, bitmap.height)
   const steps = resizeSteps(
     { width: bitmap.width, height: bitmap.height },
     target,
@@ -49,7 +52,7 @@ export function drawToCanvas(
   // Draw through each step (a single entry for upscales/small downscales),
   // feeding each canvas as the source for the next halving pass.
   let src: CanvasImageSource = bitmap
-  let canvas = createCanvas(target.width, target.height)
+  let canvas!: AnyCanvas
   for (const { width, height } of steps) {
     canvas = createCanvas(width, height)
     get2dContext(canvas).drawImage(src, 0, 0, width, height)

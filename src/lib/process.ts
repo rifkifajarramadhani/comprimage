@@ -8,6 +8,7 @@ import type {
 import { decode, drawToCanvas } from './canvas.ts'
 import { encodeCanvas } from './encode.ts'
 import { computeDimensions } from './resize.ts'
+import { assertImageDimensions } from './image-limits.ts'
 
 export interface ProcessOptions {
   /** Omit to keep the source dimensions (compress/convert only). */
@@ -42,8 +43,10 @@ export async function processToBlob(
   input: ProcessInput,
   options: ProcessOptions,
 ): Promise<ProcessedBlob> {
+  assertImageDimensions(input.width, input.height)
   const bitmap = await decode(input.file)
   try {
+    assertImageDimensions(bitmap.width, bitmap.height)
     const target = options.resize
       ? computeDimensions(
           { width: input.width, height: input.height },
