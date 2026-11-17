@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ProcessResult, SourceImage } from '#/types/image.ts'
 import type { ProcessOptions } from '#/lib/process.ts'
+import type { BatchUsage } from '#/lib/source.ts'
 import { releaseSourceImage } from '#/lib/source.ts'
 import { imagePool } from '#/workers/image-pool.ts'
 
@@ -19,6 +20,7 @@ interface QueueApi {
   addSources: (images: Array<SourceImage>) => void
   remove: (id: string) => void
   clear: () => void
+  getUsage: () => BatchUsage
 }
 interface Request {
   key: string
@@ -131,6 +133,13 @@ export function useImageQueue(options: ProcessOptions): QueueApi {
       resultsRef.current.delete(id)
     }
     return {
+      getUsage: () => ({
+        count: sourcesRef.current.length,
+        pixels: sourcesRef.current.reduce(
+          (total, source) => total + source.width * source.height,
+          0,
+        ),
+      }),
       addSources: (images: Array<SourceImage>) => {
         const next = [...sourcesRef.current]
         for (const image of images) {

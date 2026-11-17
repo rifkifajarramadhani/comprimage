@@ -91,3 +91,42 @@ it('cancels on unmount and releases a late preview', async () => {
   expect(releaseSourceImage).toHaveBeenCalledWith(source)
   expect(onImage).not.toHaveBeenCalled()
 })
+
+it('reads current batch usage at import time and cancels when the queue is cleared', async () => {
+  const getUsage = vi.fn(() => ({ count: 49, pixels: 99_000_000 }))
+  const onImages = vi.fn()
+  let finish!: (result: ImportResult) => void
+  vi.mocked(importImages).mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve
+      }),
+  )
+  const view = render(
+    <Dropzone
+      multiple
+      onImages={onImages}
+      getExistingUsage={getUsage}
+      resetKey={0}
+    />,
+  )
+  choose()
+  await screen.findByRole('button', { name: 'Cancel import' })
+  expect(importImages).toHaveBeenCalledWith(
+    [file],
+    { count: 49, pixels: 99_000_000 },
+    expect.any(AbortSignal),
+  )
+  view.rerender(
+    <Dropzone
+      multiple
+      onImages={onImages}
+      getExistingUsage={getUsage}
+      resetKey={1}
+    />,
+  )
+  expect(vi.mocked(importImages).mock.calls[0][2]?.aborted).toBe(true)
+  await act(async () => finish({ accepted: [source], rejected: [] }))
+  expect(onImages).not.toHaveBeenCalled()
+  expect(releaseSourceImage).toHaveBeenCalledWith(source)
+})

@@ -195,3 +195,16 @@ it('does not release the same batch source twice under StrictMode or reprocess a
       .mock.calls.filter(([url]) => url === image.url),
   ).toHaveLength(1)
 })
+
+it('reports current reserved batch usage before queued React updates flush', () => {
+  vi.mocked(imagePool.process).mockReturnValue(new Promise(() => {}))
+  const hook = renderHook(() => useImageQueue(defaultOptions))
+  act(() => {
+    hook.result.current.addSources([source('a'), source('b')])
+    expect(hook.result.current.getUsage()).toEqual({ count: 2, pixels: 200 })
+    hook.result.current.remove('a')
+    expect(hook.result.current.getUsage()).toEqual({ count: 1, pixels: 100 })
+    hook.result.current.clear()
+    expect(hook.result.current.getUsage()).toEqual({ count: 0, pixels: 0 })
+  })
+})

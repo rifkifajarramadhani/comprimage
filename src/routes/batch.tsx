@@ -102,6 +102,7 @@ function BatchPage() {
     quality: settings.defaultQuality,
   })
   const [zipping, setZipping] = useState(false)
+  const [importResetKey, setImportResetKey] = useState(0)
 
   const options: ProcessOptions = { encode }
 
@@ -113,6 +114,7 @@ function BatchPage() {
     addSources,
     remove,
     clear,
+    getUsage,
   } = useImageQueue(options)
 
   // Aggregate savings across everything that has finished.
@@ -159,7 +161,14 @@ function BatchPage() {
           <div className="flex items-center justify-between">
             <span className="terminal-label">[ batch options ]</span>
             {items.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={clear}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  clear()
+                  setImportResetKey((key) => key + 1)
+                }}
+              >
                 Clear all
               </Button>
             )}
@@ -212,13 +221,8 @@ function BatchPage() {
               multiple
               compact={items.length > 0}
               onImages={addSources}
-              existingUsage={{
-                count: items.length,
-                pixels: items.reduce(
-                  (sum, item) => sum + item.source.width * item.source.height,
-                  0,
-                ),
-              }}
+              getExistingUsage={getUsage}
+              resetKey={importResetKey}
             />
           </div>
 

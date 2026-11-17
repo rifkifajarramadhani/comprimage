@@ -23,6 +23,8 @@ export function Dropzone({
   compact = false,
   className,
   existingUsage,
+  getExistingUsage,
+  resetKey,
 }: {
   /** Single-image callback (default mode). */
   onImage?: (image: SourceImage) => void
@@ -32,6 +34,8 @@ export function Dropzone({
   compact?: boolean
   className?: string
   existingUsage?: BatchUsage
+  getExistingUsage?: () => BatchUsage
+  resetKey?: number
 }) {
   const [errors, setErrors] = useState<Array<ImportRejection>>([])
   const [busy, setBusy] = useState(false)
@@ -46,6 +50,13 @@ export function Dropzone({
       controllerRef.current?.abort()
     }
   }, [])
+
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort()
+      setCancelled(true)
+    }
+  }, [resetKey])
 
   const onDrop = useCallback(
     async (accepted: Array<File>, fileRejections: Array<FileRejection>) => {
@@ -72,7 +83,7 @@ export function Dropzone({
       try {
         const result = await importImages(
           accepted,
-          existingUsage,
+          getExistingUsage?.() ?? existingUsage,
           controller.signal,
         )
         owned = result.accepted
@@ -107,7 +118,7 @@ export function Dropzone({
         }
       }
     },
-    [existingUsage, multiple, onImage, onImages],
+    [existingUsage, getExistingUsage, multiple, onImage, onImages],
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -127,15 +138,21 @@ export function Dropzone({
   return (
     <div className={cn('flex flex-col gap-3', className)}>
       <div
-        {...getRootProps()}
+        {...getRootProps({
+          role: 'button',
+          'aria-label': multiple ? 'Add images' : 'Choose image',
+        })}
         aria-busy={busy}
+        aria-disabled={busy}
         className={cn(
           compact
             ? 'group relative flex min-h-11 cursor-pointer items-center justify-center rounded-sm border px-4 text-center transition-[background-color,border-color,box-shadow] duration-150 outline-none focus-within:ring-2 focus-within:ring-ring/25'
             : 'group relative flex min-h-64 cursor-pointer flex-col items-center justify-center gap-4 rounded-sm border border-dashed px-6 py-12 text-center transition-[background-color,border-color,box-shadow] duration-150 outline-none focus-within:ring-2 focus-within:ring-ring/25',
-          isDragActive
-            ? 'border-primary bg-brand-soft'
-            : 'border-input bg-background hover:border-primary hover:bg-surface',
+          busy
+            ? 'cursor-wait border-input bg-background'
+            : isDragActive
+              ? 'border-primary bg-brand-soft'
+              : 'border-input bg-background hover:border-primary hover:bg-surface',
         )}
       >
         <input {...getInputProps()} aria-label="Upload image" />
