@@ -32,16 +32,20 @@ export function useImageProcessor(
   // Keep the latest result in a ref so cleanup can revoke it.
   const resultRef = useRef<ProcessResult | null>(null)
   const runIdRef = useRef(0)
+  const controllerRef = useRef<AbortController | null>(null)
 
   // Serialize options so the effect only re-runs on meaningful changes.
   const optionsKey = JSON.stringify(options)
 
   const execute = () => {
     if (!source) return
+    controllerRef.current?.abort()
+    const controller = new AbortController()
+    controllerRef.current = controller
     const runId = ++runIdRef.current
     setState((s) => ({ ...s, isProcessing: true, error: null }))
 
-    processInPool(source, options)
+    processInPool(source, options, controller.signal)
       .then((result) => {
         // A newer run superseded this one — discard.
         if (runId !== runIdRef.current) {
@@ -54,6 +58,8 @@ export function useImageProcessor(
       })
       .catch((err: unknown) => {
         if (runId !== runIdRef.current) return
+        if (resultRef.current) URL.revokeObjectURL(resultRef.current.url)
+        resultRef.current = null
         setState({
           result: null,
           isProcessing: false,
@@ -64,11 +70,17 @@ export function useImageProcessor(
 
   useEffect(() => {
     if (!source) {
+      if (resultRef.current) URL.revokeObjectURL(resultRef.current.url)
+      resultRef.current = null
       setState({ result: null, isProcessing: false, error: null })
       return
     }
     const t = setTimeout(execute, debounceMs)
-    return () => clearTimeout(t)
+    return () => {
+      clearTimeout(t)
+      ++runIdRef.current
+      controllerRef.current?.abort()
+    }
   }, [source, optionsKey, debounceMs])
 
   // Revoke the last result on unmount.

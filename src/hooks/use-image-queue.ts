@@ -5,14 +5,12 @@ import { releaseSourceImage } from '#/lib/source.ts'
 import { imagePool } from '#/workers/image-pool.ts'
 
 export type QueueStatus = 'pending' | 'processing' | 'done' | 'error'
-
 export interface QueueItem {
   source: SourceImage
   status: QueueStatus
   result?: ProcessResult
   error?: string
 }
-
 interface QueueApi {
   items: Array<QueueItem>
   doneCount: number
@@ -22,165 +20,156 @@ interface QueueApi {
   remove: (id: string) => void
   clear: () => void
 }
-
-function patch(
-  items: Array<QueueItem>,
-  id: string,
-  change: Partial<QueueItem>,
-): Array<QueueItem> {
-  return items.map((it) => (it.source.id === id ? { ...it, ...change } : it))
+interface Request {
+  key: string
+  controller: AbortController
 }
 
-/**
- * Owns a list of source images and runs each through the shared worker pool
- * whenever it's added or the encode options change. Mirrors `useImageProcessor`'s
- * URL discipline: result URLs are revoked when superseded, removed, or unmounted,
- * and source images are released on removal/unmount.
- *
- * Processing is incremental — adding a file only encodes the new file, while
- * changing options re-encodes everything (each in-flight result is guarded by the
- * options key it was requested for, so stale results are discarded, not shown).
- */
+/** Owns sources, requests and results until removal, replacement or unmount. */
 export function useImageQueue(options: ProcessOptions): QueueApi {
   const [sources, setSources] = useState<Array<SourceImage>>([])
   const [items, setItems] = useState<Array<QueueItem>>([])
-
+  const sourcesRef = useRef(sources)
+  const resultsRef = useRef(new Map<string, ProcessResult>())
+  const requestsRef = useRef(new Map<string, Request>())
   const optionsKey = JSON.stringify(options)
-  const sourcesKey = sources.map((s) => s.id).join(',')
-
-  // id -> the current done result (kept so we can revoke its URL).
-  const resultsRef = useRef<Map<string, ProcessResult>>(new Map())
-  // id -> the options key we most recently requested processing for.
-  const desiredRef = useRef<Map<string, string>>(new Map())
-  // Latest sources, for unmount cleanup.
-  const sourcesRef = useRef<Array<SourceImage>>([])
-  sourcesRef.current = sources
-
-  // Keep `options` fresh for the async closures without re-firing the effect.
-  const optionsRef = useRef(options)
-  optionsRef.current = options
 
   useEffect(() => {
-    const ids = new Set(sources.map((s) => s.id))
-
-    // Drop bookkeeping + results for sources that were removed.
-    for (const id of [...desiredRef.current.keys()]) {
-      if (!ids.has(id)) desiredRef.current.delete(id)
-    }
-    for (const [id, result] of [...resultsRef.current]) {
-      if (!ids.has(id)) {
-        URL.revokeObjectURL(result.url)
-        resultsRef.current.delete(id)
+    const results = resultsRef.current
+    const requests = requestsRef.current
+    const currentIds = new Set(sources.map((source) => source.id))
+    for (const [id, request] of requests) {
+      if (!currentIds.has(id) || request.key !== optionsKey) {
+        requests.delete(id)
+        request.controller.abort()
+        const result = results.get(id)
+        if (result) URL.revokeObjectURL(result.url)
+        results.delete(id)
       }
     }
-
-    // Seed the visible list: keep results that already match the current options.
-    setItems(
-      sources.map((s) => {
-        const done = resultsRef.current.get(s.id)
-        if (done && desiredRef.current.get(s.id) === optionsKey) {
-          return { source: s, status: 'done', result: done }
-        }
-        return { source: s, status: 'pending' }
+    const retained = new Set(
+      sources
+        .filter((source) => requests.get(source.id)?.key === optionsKey)
+        .map((source) => source.id),
+    )
+    setItems((previous) =>
+      sources.map((source) => {
+        if (retained.has(source.id))
+          return (
+            previous.find((item) => item.source.id === source.id) ?? {
+              source,
+              status: 'processing',
+            }
+          )
+        return { source, status: 'processing' }
       }),
     )
-
-    sources.forEach((source) => {
-      // Already have a current-options result — nothing to do.
-      if (
-        desiredRef.current.get(source.id) === optionsKey &&
-        resultsRef.current.has(source.id)
-      ) {
-        return
+    for (const source of sources) {
+      // Includes active and failed requests. Adding sources must not duplicate
+      // in-flight work or silently retry earlier failures.
+      if (requests.get(source.id)?.key === optionsKey) continue
+      const request: Request = {
+        key: optionsKey,
+        controller: new AbortController(),
       }
-
-      desiredRef.current.set(source.id, optionsKey)
-      const stale = resultsRef.current.get(source.id)
-      if (stale) {
-        URL.revokeObjectURL(stale.url)
-        resultsRef.current.delete(source.id)
-      }
-
-      setItems((prev) =>
-        patch(prev, source.id, {
-          status: 'processing',
-          result: undefined,
-          error: undefined,
-        }),
-      )
-
-      imagePool
+      requests.set(source.id, request)
+      const current = () =>
+        requests.get(source.id) === request &&
+        !request.controller.signal.aborted
+      const patch = (change: Partial<QueueItem>) =>
+        setItems((previous) =>
+          previous.map((item) =>
+            item.source.id === source.id ? { ...item, ...change } : item,
+          ),
+        )
+      void imagePool
         .process(
-          {
-            file: source.file,
-            width: source.width,
-            height: source.height,
-          },
-          optionsRef.current,
+          { file: source.file, width: source.width, height: source.height },
+          options,
+          request.controller.signal,
         )
         .then((result) => {
-          // Superseded by an options change (or the source was removed).
-          if (desiredRef.current.get(source.id) !== optionsKey) {
+          if (!current()) {
             URL.revokeObjectURL(result.url)
             return
           }
-          resultsRef.current.set(source.id, result)
-          setItems((prev) => patch(prev, source.id, { status: 'done', result }))
+          results.set(source.id, result)
+          patch({ status: 'done', result })
         })
-        .catch((err: unknown) => {
-          if (desiredRef.current.get(source.id) !== optionsKey) return
-          setItems((prev) =>
-            patch(prev, source.id, {
-              status: 'error',
-              error: err instanceof Error ? err.message : 'Processing failed.',
-            }),
-          )
+        .catch((error: unknown) => {
+          if (!current()) return
+          patch({
+            status: 'error',
+            error:
+              error instanceof Error ? error.message : 'Processing failed.',
+          })
         })
-    })
-    // sourcesKey + optionsKey capture every meaningful change; `options` and
-    // `sources` are read through refs so they don't need to be dependencies.
-  }, [sourcesKey, optionsKey])
+    }
+  }, [sources, optionsKey])
 
-  // Release everything on unmount.
-  useEffect(() => {
-    return () => {
-      for (const result of resultsRef.current.values()) {
+  useEffect(
+    () => () => {
+      for (const request of requestsRef.current.values())
+        request.controller.abort()
+      requestsRef.current.clear()
+      for (const result of resultsRef.current.values())
         URL.revokeObjectURL(result.url)
-      }
       resultsRef.current.clear()
       for (const source of sourcesRef.current) releaseSourceImage(source)
-    }
-  }, [])
-
-  const api = useMemo<
-    Omit<QueueApi, 'items' | 'doneCount' | 'errorCount' | 'isProcessing'>
-  >(
-    () => ({
-      addSources: (images) =>
-        setSources((prev) => {
-          const seen = new Set(prev.map((s) => s.id))
-          return [...prev, ...images.filter((i) => !seen.has(i.id))]
-        }),
-      remove: (id) =>
-        setSources((prev) => {
-          const target = prev.find((s) => s.id === id)
-          if (target) releaseSourceImage(target)
-          return prev.filter((s) => s.id !== id)
-        }),
-      clear: () =>
-        setSources((prev) => {
-          for (const s of prev) releaseSourceImage(s)
-          return []
-        }),
-    }),
+      sourcesRef.current = []
+    },
     [],
   )
 
-  const doneCount = items.filter((i) => i.status === 'done').length
-  const errorCount = items.filter((i) => i.status === 'error').length
-  const isProcessing = items.some(
-    (i) => i.status === 'pending' || i.status === 'processing',
-  )
-
-  return { items, doneCount, errorCount, isProcessing, ...api }
+  const api = useMemo(() => {
+    const discard = (id: string) => {
+      const request = requestsRef.current.get(id)
+      requestsRef.current.delete(id)
+      request?.controller.abort()
+      const result = resultsRef.current.get(id)
+      if (result) URL.revokeObjectURL(result.url)
+      resultsRef.current.delete(id)
+    }
+    return {
+      addSources: (images: Array<SourceImage>) => {
+        const next = [...sourcesRef.current]
+        for (const image of images) {
+          const duplicate = next.find((source) => source.id === image.id)
+          if (!duplicate) next.push(image)
+          else if (duplicate.url !== image.url) releaseSourceImage(image)
+        }
+        sourcesRef.current = next
+        setSources(next)
+      },
+      remove: (id: string) => {
+        discard(id)
+        const source = sourcesRef.current.find(
+          (candidate) => candidate.id === id,
+        )
+        if (source) releaseSourceImage(source)
+        const next = sourcesRef.current.filter(
+          (candidate) => candidate.id !== id,
+        )
+        sourcesRef.current = next
+        setSources(next)
+      },
+      clear: () => {
+        for (const source of sourcesRef.current) {
+          discard(source.id)
+          releaseSourceImage(source)
+        }
+        sourcesRef.current = []
+        setSources([])
+      },
+    }
+  }, [])
+  return {
+    items,
+    doneCount: items.filter((item) => item.status === 'done').length,
+    errorCount: items.filter((item) => item.status === 'error').length,
+    isProcessing: items.some(
+      (item) => item.status === 'pending' || item.status === 'processing',
+    ),
+    ...api,
+  }
 }
