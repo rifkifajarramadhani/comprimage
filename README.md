@@ -110,7 +110,7 @@ Production:
 docker compose --profile prod up -d --build
 ```
 
-TLS and routing are handled by the shared **Traefik** edge proxy (Let's Encrypt). The `web-prod` container joins the `edge` Docker network and publishes **no** host ports; routing is configured via Traefik labels on the `web-prod` service in `docker-compose.yml`.
+TLS and routing are handled by the shared **Traefik** edge proxy (Let's Encrypt). The router uses a per-source-IP token bucket with `average=100`, `period=1s`, and `burst=200`. This permits a sustained 100 requests per second with burst capacity of 200 across documents and assets. It does not limit local image processing. The `web-prod` container joins the `edge` Docker network and publishes **no** host ports; routing is configured via Traefik labels on the `web-prod` service in `docker-compose.yml`.
 
 > `vite.config.ts` pins the prerender preview server to `127.0.0.1` so the build's prerender step is reliable inside containers.
 

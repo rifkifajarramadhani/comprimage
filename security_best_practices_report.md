@@ -6,7 +6,7 @@ Date: 2026-11-16. Reviewed source revision: `4e6ce12`.
 
 The audit identified three medium-priority findings and two low-priority findings. Prioritize upgrading the nginx production image, adding compatible browser security headers, and verifying the deployment server's SSH fingerprint. No working nginx exploit or exploitable application XSS path was established. `bun audit` reported no known vulnerabilities across 481 packages; this does not cover container packages or prove the application is free of vulnerabilities.
 
-This report records the approved read-only audit and its follow-up recommendations. Repository evidence, package checks, and one ordinary production response were rechecked while preparing it. The existing untracked `public/sw.js` is outside the reviewed revision and remains untouched.
+Local remediation was implemented and verified on 2026-11-17. The implementation notes under SEC-001 through SEC-005 record local results and pending production checks. Original evidence and recommendations below describe revision `4e6ce12`; their historical line references may differ from the current files. The existing untracked `public/sw.js` remains outside this work and untouched.
 
 ## Scope and evidence
 
@@ -89,9 +89,11 @@ Recommendation: pin reviewed actions to full commit SHAs and maintain those pins
 
 ## Rate-limit assessment
 
+Local implementation: `docker-compose.yml` now specifies `period=1s` explicitly, preserving `average=100`, `burst=200`, and default connection-IP grouping. Production Compose validation passed. An isolated Traefik v3.7.15 proxy, configured from these label values, accepted 201 of 600 local requests in 162 ms, rejected 399 with HTTP 429, and accepted a request after a 250 ms refill interval. No production load test was performed; shared-proxy and real-traffic verification remain pending.
+
 The labels at [docker-compose.yml:37](docker-compose.yml#L37) configure `average=100`, `burst=200`, and attach the middleware to the hostname's router. With the documented default `period=1s`, this is a sustained rate of 100 requests per second per source IP, with an instantaneous burst capacity of 200. It is a token bucket, not a strict 100-request ceiling in each calendar second. The defaults and grouping were checked against [Traefik's rate-limit documentation](https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/ratelimit/) through Context7.
 
-Keep the thresholds pending traffic measurements and make `period=1s` explicit in a follow-up. The confirmed direct-to-Traefik topology suits the default connection-IP grouping. There is no reason to switch grouping to client-supplied forwarded headers. Reassess trusted proxy handling if that topology changes.
+Keep the thresholds pending traffic measurements. The interval is now explicit in the local Compose configuration. The confirmed direct-to-Traefik topology suits the default connection-IP grouping. There is no reason to switch grouping to client-supplied forwarded headers. Reassess trusted proxy handling if that topology changes.
 
 The middleware covers documents and static assets, including codec downloads. It does not govern local image processing. Limits use each Traefik instance's memory unless shared storage is configured; none is configured in this repository. The shared Traefik installation was not inspected. IP rotation can evade per-IP limits, while visitors behind shared NAT compete for one allowance. Request frequency also does not bound concurrent requests or download bandwidth.
 
@@ -114,6 +116,8 @@ Treat these as compatibility migrations rather than advisory-driven fixes. Defer
 
 ## Verification and limitations
 
-The approved audit reported 29 passing tests, ESLint and Prettier success, and valid production Compose configuration. Report preparation reconfirmed the package audit, outdated-package inventory, parser support range, production Compose validity with `docker compose --profile prod config --quiet`, and the ordinary production response described above. The report checkpoint requires `bunx prettier --check security_best_practices_report.md` and a diff review. Repository tests, lint, and formatting are also rerun before handoff.
+The approved audit reported 29 passing tests, ESLint and Prettier success, and valid production Compose configuration. Report preparation reconfirmed the package audit, outdated-package inventory, parser support range, production Compose validity with `docker compose --profile prod config --quiet`, and the ordinary production response described above. The implementation passed 69 tests, ESLint, TypeScript, Prettier, frozen installation, production build/SEO verification, dependency audit, actionlint, and production Compose validation. Local Docker/nginx, report-only/enforced CSP, import, worker-recovery, SSH, and isolated proxy checks are recorded above. Chromium checks covered 1440px and 390px viewports; no cross-browser coverage is claimed.
 
-The review did not establish a working exploit, exhaustively test browser codecs, load-test production, inventory all container OS vulnerabilities, inspect the host deployment script, or verify the shared Traefik version and host configuration. Header observations cover a sample response. Advisory and registry results are time-sensitive. Recommended fixes require their own implementation and verification; this checkpoint delivers the audit report.
+The audit did not establish a working exploit. Local checks exercised all five output codecs but did not exhaustively test codec behavior, inventory every container OS advisory, inspect the host deployment script, or verify the shared production Traefik configuration. The standalone settings route produced a React hydration warning with local Bun-prerendered output; its concurrency defaults and route code are unchanged by this work. The generic UI scanner also reported existing select/button wrapper false positives and an unused textarea styling issue outside this change. The touched upload UI was verified separately.
+
+Remaining operational work: configure the trusted GitHub SSH fingerprint secret, run the gated workflow in GitHub, deploy the production image, and verify the production nginx version, CSP/security headers, routes, cache/error responses, and realistic page/asset loading through the shared proxy. No push, registry publication, secret configuration, or production deployment was performed. Advisory and registry results are time-sensitive; unrelated major dependency migrations remain deferred.
