@@ -118,7 +118,19 @@ Validate a local production container with `docker exec <container> nginx -t` an
 
 ### CI
 
-On push to `main`, [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds the Docker image, pushes it to GHCR (`ghcr.io/rifkifajarramadhani/comprimage`), and SSH-deploys to the production host.
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) validates pull
+requests and pushes to `main` using Bun 1.4.4, frozen installation, tests, lint,
+formatting, production build, and `bun audit`. The audit covers application and
+development dependencies and blocks publishing on every advisory severity, with
+no exceptions. A failed registry request also blocks the job.
+
+Only successful validation on a push to `main` permits the publishing job to
+build and push GHCR images and the dependent SSH deployment to run. Workflow
+tokens default to `contents: read`; only publishing receives `packages: write`.
+Every action uses a reviewed full commit SHA with a release comment.
+[Dependabot](.github/dependabot.yml) proposes weekly GitHub Actions updates;
+review changes to those pins before merging. Local changes do not configure
+secrets, push images, or run production deployments.
 
 The build generates `dist/nginx/security-headers.conf` outside `dist/client` by
 hashing inline scripts in every emitted HTML document, including hydration and
